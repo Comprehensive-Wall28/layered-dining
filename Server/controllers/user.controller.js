@@ -85,9 +85,7 @@ const userController = {
                     message: error.message
                 });
             }
-        }
-            
+        }   
     }
-
 }
 module.exports = userController;

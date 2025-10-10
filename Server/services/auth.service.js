@@ -78,12 +78,6 @@ const authService = {
         };
     },
 
-    // async logout(req, res) {
-    //     res.cookie('jwt','',{
-    //         expires: new Date(0)
-    //     })
-    // }
-
 };
 
 module.exports = authService;
