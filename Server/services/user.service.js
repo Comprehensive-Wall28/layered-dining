@@ -1,7 +1,5 @@
 const UserModel = require('../models/user');
-
-// const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
+const LogModel = require('../models/log');
 
 const customerService = {
 
@@ -20,7 +18,14 @@ const customerService = {
             error.code = 404;
             throw error;
         }
-
+        const log = new LogModel({
+            action: 'DELETE',
+            description: 'User deleted successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            userId: deletedUser._id,
+        });
+        await log.save();
         return{
             id: deletedUser._id,
             name: deletedUser.name,
@@ -77,17 +82,28 @@ const customerService = {
         }
         if(name){
             user.name = name;
-            modifiedParameters.push('name');
+            modifiedParameters.push('NAME');
         }
         if(email){
             user.email = email;
-            modifiedParameters.push('email');
+            modifiedParameters.push('EMAIL');
         }
         if(password){
             user.password = password;
-            modifiedParameters.push('password');
+            modifiedParameters.push('PASSWORD');
         }
         await user.save(); //Save the user
+
+        if(modifiedParameters.length > 0){
+            const log = new LogModel({
+                action: 'UPDATE',
+                description: 'User updated: ' + modifiedParameters,
+                severity: 'NOTICE',
+                type: 'SUCCESS',
+                userId: user._id,
+            });
+            await log.save();
+        }
 
         return {
             modifiedParameters: modifiedParameters,

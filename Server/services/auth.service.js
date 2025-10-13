@@ -1,4 +1,5 @@
 const UserModel = require('../models/user');
+const LogModel = require('../models/log');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -6,7 +7,7 @@ const jwt = require('jsonwebtoken');
 const authService = {
 
     /**
-     * Log users in
+     * Log users in, return token
      * @param {string} email - The user's email address.
      * @param {string} password - The user's plain text password.
      * @returns {string} The generated JSON Web Token (JWT).
@@ -23,9 +24,19 @@ const authService = {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
+
         if (!isPasswordValid) {
             const error = new Error('Invalid credentials');
             error.code = 401;
+
+            const log = new LogModel({ //Log action
+                action: 'LOG_IN',
+                description: 'User failed to provide correct password',
+                severity: 'IMPORTANT',
+                type: 'FAILURE',
+                userId: user._id,
+            });
+            await log.save();
             throw error;
         }
 
@@ -34,6 +45,15 @@ const authService = {
             process.env.SECRET_KEY,
             { expiresIn: '1d' }
         );
+        //Save new log
+        const log = new LogModel({
+            action: 'LOG_IN',
+            description: 'User logged in successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            userId: user._id,
+        });
+        await log.save();
 
         return token;
     },
@@ -71,13 +91,21 @@ const authService = {
         // Save the new user to the database
         await newUser.save();
 
+        const log = new LogModel({
+            action: 'CREATE',
+            description: 'New User created successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            userId: newUser._id,
+        });
+        await log.save();
+
         return { 
             id: newUser._id, 
             name: newUser.name, 
             email: newUser.email 
         };
     },
-
 };
 
 module.exports = authService;
