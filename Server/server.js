@@ -42,15 +42,14 @@ app.use("/api/v1/auth", authRouter);
 // Start the server
 const startServer = async () => {
   await connectDB();
-
   app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
+    console.log(`Server is listening on port ${port}`);
   });
 };
 
 // Primary Test Route "http://localhost:PORT/"
 app.get('/', (req, res) => {
-  res.send('Backend started successfully!')
+  res.send('Welcome! Backend started successfully.')
 })
 
 //Default Error

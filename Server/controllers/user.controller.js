@@ -85,9 +85,26 @@ const userController = {
                     message: error.message
                 });
             }
-        }
-            
-    }
+        }   
+    },
 
+    getLogs: async (req, res) => {
+        try {
+            const {id} = req.params;
+            //call service
+            const logs = await userService.getLogs(id);
+
+            res.status(200).json({
+                status: 'success',
+                logs
+            });
+
+        } catch (error) {
+            res.status(error.code || 500).json({
+                status: 'error',
+                message: error.message
+            })
+        }
+    }
 }
 module.exports = userController;

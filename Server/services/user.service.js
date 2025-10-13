@@ -1,7 +1,5 @@
 const UserModel = require('../models/user');
-
-// const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
+const LogModel = require('../models/log');
 
 const customerService = {
 
@@ -20,7 +18,14 @@ const customerService = {
             error.code = 404;
             throw error;
         }
-
+        const log = new LogModel({
+            action: 'DELETE',
+            description: 'User deleted successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            userId: deletedUser._id,
+        });
+        await log.save();
         return{
             id: deletedUser._id,
             name: deletedUser.name,
@@ -77,23 +82,57 @@ const customerService = {
         }
         if(name){
             user.name = name;
-            modifiedParameters.push('name');
+            modifiedParameters.push('NAME');
         }
         if(email){
             user.email = email;
-            modifiedParameters.push('email');
+            modifiedParameters.push('EMAIL');
         }
         if(password){
             user.password = password;
-            modifiedParameters.push('password');
+            modifiedParameters.push('PASSWORD');
         }
         await user.save(); //Save the user
+
+        if(modifiedParameters.length > 0){
+            const log = new LogModel({
+                action: 'UPDATE',
+                description: 'User updated: ' + modifiedParameters,
+                severity: 'NOTICE',
+                type: 'SUCCESS',
+                userId: user._id,
+            });
+            await log.save();
+        }
 
         return {
             modifiedParameters: modifiedParameters,
             message: 'User updated successfully!'
         }
+    },
+    /**
+     * Get logs attached to user ID
+     * @param {ID} id - The user's ID.
+     * @returns {string} Logs
+     * @throws {Error} If user or logs not found
+     */
+    async getLogs(id) {
+        if (!id) {
+            const error = new error('No ID provided');
+            error.code = 400;
+            throw error;
+        }
+        //Get logs
+        const logs = await LogModel.find({userId: id});
+
+        if(!logs){
+            const error = new Error('No logs found for the provided user');
+            error.code = 404;
+            throw error;
+        }
+        return logs;
     }
+
 
 };
 

@@ -50,6 +50,16 @@ const authController = {
                 message: error.message 
             });
         }
+    },
+
+    logout: async (req, res) => {
+        // Clear the 'jwt' token cookie. 
+        res.clearCookie('jwt', {
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict' 
+        });
+        res.status(200).json({ message: 'Logged out successfully' });
     }
 }
 module.exports = authController;

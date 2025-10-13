@@ -5,7 +5,7 @@ module.exports= function authorizationMiddleware(roles) {
         const userRole = req.user.role;
 
         if (!roles.includes(userRole)){
-            return res.status(403).json({message: "Authorization required"});
+            return res.status(403).json({message: "You are unauthorized to perform this action"});
         }
         next();
     };
