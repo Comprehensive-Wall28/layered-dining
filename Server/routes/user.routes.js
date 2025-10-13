@@ -3,7 +3,6 @@ const router = Router();
 
 const authenticationMiddleware = require('../middleware/authentication.middleware.js');
 const authorizationMiddleware = require('../middleware/authorization.middleware.js');
-const authController = require("../controllers/auth.controller.js");
 const userController = require("../controllers/user.controller.js");
 
 const ROLES = {
