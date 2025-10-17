@@ -105,6 +105,33 @@ const userController = {
                 message: error.message
             })
         }
+    },
+
+    createFeedback: async (req, res) => {
+        try {
+            const {feedback, rating} = req.body;
+            const {id} = req.user;
+            
+            const result = await userService.createFeedback(id, feedback, rating);
+
+            res.status(201).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            if(error.code == 400){ //feedback not provided
+                res.status(400).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        }
     }
 }
 module.exports = userController;

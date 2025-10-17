@@ -1,5 +1,6 @@
 const UserModel = require('../models/user');
 const LogModel = require('../models/log');
+const FeedbackModel = require('../models/feedback');
 
 const customerService = {
 
@@ -131,6 +132,39 @@ const customerService = {
             throw error;
         }
         return logs;
+    },
+    /**
+     * Create new feedback
+     * @param {ID} id - The user's ID.
+     * @param {STRING} feedback - The user's feedback text
+     * @returns {string} Confirmation
+     * @throws {Error} If feedback not provided
+     */
+    async createFeedback(id, feedback, rating) {
+        if(!feedback){
+            const error = new Error('No feedback provided');
+            error.code = 400;
+            throw error;
+        }
+        const newFeedback = new FeedbackModel({
+            userId: id,
+            feedback: feedback,
+            rating: rating
+        });
+        await newFeedback.save();
+        const log = new LogModel({
+            action: 'CREATE',
+            description: 'New feedback created successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            affectedDocument: newFeedback._id,
+            affectedModel: 'Feedback',
+            userId: id,
+        });
+        await log.save();
+        return {
+            message: 'Feedback created successfully'
+        }
     }
 
 
