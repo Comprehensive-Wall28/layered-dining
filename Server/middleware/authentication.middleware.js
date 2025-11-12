@@ -2,23 +2,19 @@ const jwt = require("jsonwebtoken");
 const secretKey = process.env.SECRET_KEY
 
 module.exports = function authenticationMiddleware(req, res, next) {
+  (async () => {
+    try {
+      const token = req.cookies.jwt;
 
-  const cookie = req.cookies;
+      if (!token) {
+        return res.status(401).json({ message: "Authentication required" }); 
+      }
 
-  if (!cookie) {
-    return res.status(401).json({ message: "Authentication required" }); 
-  }
-  const token = cookie.token;
-  if (!token) {
-    return res.status(401).json({ message: "Authentication required" }); 
-   }
-
-  jwt.verify(token, secretKey, (error, decoded) => {
-    if (error) {
+      const decoded = await jwt.verify(token, secretKey);
+      req.user = decoded.user;
+      next();
+    } catch (error) {
       return res.status(401).json({ message: "Invalid token" });
     }
-
-    req.user = decoded.user;
-    next();
-  });
+  })();
 }

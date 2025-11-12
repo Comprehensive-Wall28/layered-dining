@@ -1,7 +1,5 @@
-const userModel = require("../models/user");
-const jwt = require("jsonwebtoken");
 require("dotenv").config();
-const UserService = require("../services/user.service");
+const authService = require("../services/auth.service");
 
 const authController = {
 
@@ -9,12 +7,19 @@ const authController = {
         try {
             const { email, password } = req.body;
 
-            const token = await UserService.login(email, password);
+            const token = await authService.login(email, password);
+
+            res.cookie('jwt', token, {
+                httpOnly: true, 
+                secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+                sameSite: 'strict',
+                maxAge: 24 * 60 * 60 * 1000 // 1 day
+            });
 
             res.status(200).json({ 
-            status: 'success', 
-            token 
-        });
+                status: 'success', 
+                message: 'Logged in successfully'
+            });
 
         } catch (error) {
             const statusCode = error.code || 500;
@@ -26,12 +31,12 @@ const authController = {
     },
     
     register: async (req, res) => {
-        // 1. Extract data from the request
+        // 1. Extract from the request
         const { email, password, name, role } = req.body;
 
         try {
             // 2. Call the core service function
-            const newUser = await UserService.registerUser(email, password, name, role);
+            const newUser = await authService.registerUser(email, password, name, role);
             
             res.status(201).json({ 
                 message: 'User registered successfully',
@@ -45,9 +50,16 @@ const authController = {
                 message: error.message 
             });
         }
+    },
+
+    logout: async (req, res) => {
+        // Clear the 'jwt' token cookie. 
+        res.clearCookie('jwt', {
+            httpOnly: true, 
+            secure: process.env.NODE_ENV === 'production', 
+            sameSite: 'strict' 
+        });
+        res.status(200).json({ message: 'Logged out successfully' });
     }
-
-
-
 }
 module.exports = authController;
