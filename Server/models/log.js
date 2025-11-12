@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
     },
     affectedModel: { 
         type: String,
-        enum: ['User', 'Order', 'Post', 'Order'], //Update based on models aded later!
+        enum: ['User', 'Order', 'Post', 'Reservation', 'Table'], //Update based on models aded later!
         required: false,
     },
     severity: { //Severity
