@@ -19,7 +19,7 @@ router.get("/", menuController.getAllMenuItems);
 router.get("/:id", menuController.getMenuItemById);
 
 // Protected routes - ADD MIDDLEWARE BACK!
-router.post("/menu",
+router.post("/",
     authenticationMiddleware,
     authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
     menuController.createMenuItem
