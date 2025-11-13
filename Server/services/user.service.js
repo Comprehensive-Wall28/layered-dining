@@ -4,7 +4,7 @@ const FeedbackModel = require('../models/feedback');
 
 const customerService = {
 
-     /**
+    /**
      * Delete user account
      * @param {ID} id - The user's ID.
      * @returns {string} The deleted user's details
@@ -34,7 +34,7 @@ const customerService = {
             message: 'User deleted successfully'
         }
     },
-     /**
+    /**
      * Get user account
      * @param {ID} id - The user's ID.
      * @returns {string} The user's details
@@ -62,7 +62,7 @@ const customerService = {
             role: user.role
         }
     },
-     /**
+    /**
      * Update user account details, not all parameters are required, only one is.
      * @param {ID} id - The user's ID.
      * @param {NAME} name - The user's new name
@@ -165,9 +165,36 @@ const customerService = {
         return {
             message: 'Feedback created successfully'
         }
+    },
+    /**
+     * Get feedback details
+     * @param {ID} id - The feedback's ID.
+     * @returns {string} Feedback
+     * @throws {Error} If ID not provided
+     */
+    async getFeedback(id) {
+        if(!id){
+            const error = new Error('No feedback ID provided');
+            error.code = 400;
+            throw error;
+        }
+
+        const feedback = await FeedbackModel.findById(id);
+        if(!feedback){
+            const error = new Error('No feedback found for corresponding ID');
+            error.code = 404;
+            throw error;
+        }
+        return feedback;
+    },
+    /**
+     * Get all feedback
+     * @returns {string} Feedback
+     */
+    async getAllFeedback() {
+        const feedback = await FeedbackModel.find();
+        return feedback;
     }
-
-
-};
+}
 
 module.exports = customerService;

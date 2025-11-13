@@ -132,6 +132,54 @@ const userController = {
                 });
             }
         }
+    },
+
+    getFeedback: async (req, res) => {
+        try {
+            const {id} = req.params;
+
+            const result = await userService.getFeedback(id);
+
+            res.status(200).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            if (error.code == 404){
+                res.status(404).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else if (error.code == 400){
+                res.status(400).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                    res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        }
+    },
+
+    getAllFeedback: async (req, res) => {
+        try {
+            const result = await userService.getAllFeedback();
+
+            res.status(200).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
     }
 }
 module.exports = userController;

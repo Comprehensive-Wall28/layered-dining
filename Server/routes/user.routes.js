@@ -17,6 +17,8 @@ router.put("/profile", authenticationMiddleware, userController.updateUserProfil
 router.get("/log/:id", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), userController.getLogs)
 
 router.post("/feedback", authenticationMiddleware, authorizationMiddleware([ROLES.CUSTOMER]), userController.createFeedback);
+router.get("/feedback", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN,ROLES.MANAGER]), userController.getAllFeedback);
+router.get("/feedback/:id", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN,ROLES.MANAGER]), userController.getFeedback);
 
 router.delete("/delete/:id",authenticationMiddleware,authorizationMiddleware([ROLES.CUSTOMER]),userController.deleteAccount);
 
