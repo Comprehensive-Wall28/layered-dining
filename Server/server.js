@@ -25,6 +25,7 @@ const app = express();
 //routes
 const authRouter = require("./routes/auth.routes.js")
 const userRouter = require("./routes/user.routes.js")
+const menuRouter = require("./routes/menu.routes.js")
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -35,17 +36,11 @@ app.use(cors({
   credentials: true,
 }));
 
+
 //use routes
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auth", authRouter);
-
-// Start the server
-const startServer = async () => {
-  await connectDB();
-  app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-  });
-};
+app.use("/api/v1/menu", menuRouter);
 
 // Primary Test Route "http://localhost:PORT/"
 app.get('/', (req, res) => {
@@ -57,5 +52,13 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send('Something broke! \n You probably had an invalid input not handled by the controller. \n Check the terminal for the error code\n' + 'Error: ' + err.message);
 });
+
+// Start the server
+const startServer = async () => {
+  await connectDB();
+  app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+  });
+};
 
 startServer();
