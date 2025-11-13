@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/database');
 const cookieParser=require('cookie-parser')
+const cron = require('node-cron'); 
 
 if (!process.env.MONGODB_URI) {
   console.error("FATAL ERROR: DATABASE_URI environment variable is not set.");
@@ -78,6 +79,35 @@ app.get('/debug/routes', (req, res) => {
   });
   res.json({ routes });
 })
+
+cron.schedule('0 0 * * 0', async () => {
+    console.log("Running weekly low-stock check...");
+    try {
+        const items = await Item.find({});
+        const managers = await User.find({ type: 'manager' });
+
+        for (let item of items) {
+            if (item.lOWarningThreshold !== undefined && item.quantity <= item.lOWarningThreshold) {
+                for (let manager of managers) {
+                    // Avoid duplicate notifications
+                    const alreadyNotified = manager.notifications.some(
+                        n => n.title === `Low Stock Alert: ${item.name}` && !n.read
+                    );
+
+                    if (!alreadyNotified) {
+                        manager.notifications.push({
+                            title: `Low Stock Alert: ${item.name}`,
+                            message: `The item "${item.name}" is low. Quantity left: ${item.quantity} ${item.unit || ''}.`
+                        });
+                        await manager.save();
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.error("Error in weekly low-stock check:", err);
+    }
+});
 
 //Default Error
 app.use((err, req, res, next) => {
