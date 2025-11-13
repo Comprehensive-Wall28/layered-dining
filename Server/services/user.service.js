@@ -1,9 +1,10 @@
 const UserModel = require('../models/user');
 const LogModel = require('../models/log');
+const FeedbackModel = require('../models/feedback');
 
 const customerService = {
 
-     /**
+    /**
      * Delete user account
      * @param {ID} id - The user's ID.
      * @returns {string} The deleted user's details
@@ -33,7 +34,7 @@ const customerService = {
             message: 'User deleted successfully'
         }
     },
-     /**
+    /**
      * Get user account
      * @param {ID} id - The user's ID.
      * @returns {string} The user's details
@@ -61,7 +62,7 @@ const customerService = {
             role: user.role
         }
     },
-     /**
+    /**
      * Update user account details, not all parameters are required, only one is.
      * @param {ID} id - The user's ID.
      * @param {NAME} name - The user's new name
@@ -131,9 +132,69 @@ const customerService = {
             throw error;
         }
         return logs;
+    },
+    /**
+     * Create new feedback
+     * @param {ID} id - The user's ID.
+     * @param {STRING} feedback - The user's feedback text
+     * @returns {string} Confirmation
+     * @throws {Error} If feedback not provided
+     */
+    async createFeedback(id, feedback, rating) {
+        if(!feedback){
+            const error = new Error('No feedback provided');
+            error.code = 400;
+            throw error;
+        }
+        const newFeedback = new FeedbackModel({
+            userId: id,
+            feedback: feedback,
+            rating: rating
+        });
+        await newFeedback.save();
+        const log = new LogModel({
+            action: 'CREATE',
+            description: 'New feedback created successfully',
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            affectedDocument: newFeedback._id,
+            affectedModel: 'Feedback',
+            userId: id,
+        });
+        await log.save();
+        return {
+            message: 'Feedback created successfully'
+        }
+    },
+    /**
+     * Get feedback details
+     * @param {ID} id - The feedback's ID.
+     * @returns {string} Feedback
+     * @throws {Error} If ID not provided
+     */
+    async getFeedback(id) {
+        if(!id){
+            const error = new Error('No feedback ID provided');
+            error.code = 400;
+            throw error;
+        }
+
+        const feedback = await FeedbackModel.findById(id);
+        if(!feedback){
+            const error = new Error('No feedback found for corresponding ID');
+            error.code = 404;
+            throw error;
+        }
+        return feedback;
+    },
+    /**
+     * Get all feedback
+     * @returns {string} Feedback
+     */
+    async getAllFeedback() {
+        const feedback = await FeedbackModel.find();
+        return feedback;
     }
-
-
-};
+}
 
 module.exports = customerService;

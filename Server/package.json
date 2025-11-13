@@ -1,5 +1,5 @@
 {
-  "name": "restaurant-management-system",
+  "name": "layered-dining",
   "version": "1.0.0",
   "description": "Software Testing Project",
   "main": "server.js",
@@ -12,7 +12,7 @@
     "url": "git+https://github.com/Comprehensive-Wall28/restaurant-management-system.git"
   },
   "keywords": [],
-  "author": "Fady Osama, Youssef Amr, Karim, Mohammed Galal, Omar Hossam",
+  "author": "Fady Osama, Youssef Amr, Karim Mostafa, Mohammed Galal, Omar Hossam",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
