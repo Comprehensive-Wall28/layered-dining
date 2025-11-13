@@ -161,10 +161,14 @@ const reservationService = {
 
             await newReservation.save();
 
+            // Mark table as Reserved when reservation is created
+            table.status = 'Reserved';
+            await table.save();
+
             // Create log entry
             const log = new LogModel({
                 action: 'CREATE',
-                description: `Reservation created for table ${table.tableNumber} on ${reservationDate}`,
+                description: `Reservation created for table ${table.tableNumber} on ${reservationDate}. Table status changed to Reserved.`,
                 affectedDocument: newReservation._id,
                 affectedModel: 'Reservation',
                 severity: 'NOTICE',
