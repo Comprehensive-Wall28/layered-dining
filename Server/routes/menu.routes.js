@@ -25,16 +25,7 @@ router.post("/",
     menuController.createMenuItem
 );
 
-router.put("/:id",
-    authenticationMiddleware,
-    authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
-    menuController.updateMenuItem
-);
-
-router.delete("/:id",
-    authenticationMiddleware,
-    authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]),
-    menuController.deleteMenuItem
-);
+router.put("/:id", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]), menuController.updateMenuItem);
+router.delete("/:id", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]), menuController.deleteMenuItem);
 
 module.exports = router;
