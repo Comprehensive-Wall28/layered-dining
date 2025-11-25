@@ -77,7 +77,6 @@ const userController = {
         }
     },
 
-    updateUserProfile: async (req, res) => {
     updateUserProfile: async (req, res) => { //can manager also do it?
         try {
             const {id} = req.user;
