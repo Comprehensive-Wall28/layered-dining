@@ -118,7 +118,7 @@ const customerService = {
      */
     async getLogs(id) {
         if (!id) {
-            const error = new error('No ID provided');
+            const error = new Error('No ID provided');
             error.code = 400;
             throw error;
         }
@@ -131,6 +131,46 @@ const customerService = {
             throw error;
         }
         return logs;
+    },
+
+    /**
+     * Get cart id for a user
+     * @param {ID} id - The user's ID.
+     * @returns {ObjectId} The user's cart id
+     * @throws {Error} If user not found or ID not provided
+     */
+    async getCartId(id) {
+        if (!id) {
+            const error = new Error('No ID provided');
+            error.code = 400;
+            throw error;
+        }
+
+        const user = await UserModel.findById(id);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+
+        return user.cart;
+    },
+
+    async setCartId(userId, cartId) {
+        if (!userId) {
+            const error = new Error('No user ID provided');
+            error.code = 400;
+            throw error;
+        }
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+        user.cart = cartId;
+        await user.save();
+        return user.cart;
     }
 
 

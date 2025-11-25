@@ -103,7 +103,8 @@ const authService = {
         return { 
             id: newUser._id, 
             name: newUser.name, 
-            email: newUser.email 
+            email: newUser.email,
+            cart: newUser.cart
         };
     },
 };

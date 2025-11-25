@@ -60,6 +60,24 @@ const userController = {
         }
     },
 
+    getCartId: async (req, res) => {
+        try {
+            const { id } = req.user;
+            const cartId = await userService.getCartId(id);
+
+            res.status(200).json({
+                status: 'success',
+                cartId
+            });
+        } catch (error) {
+            res.status(error.code || 500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    updateUserProfile: async (req, res) => {
     updateUserProfile: async (req, res) => { //can manager also do it?
         try {
             const {id} = req.user;
