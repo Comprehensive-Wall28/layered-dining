@@ -56,7 +56,6 @@ const orderService = {
 
         return order;
     },
-
     async getOrderById(id) {
         const order = await Order.findById(id);
         if (!order) {
@@ -88,6 +87,45 @@ const orderService = {
         if (paymentStatus) {
             order.paymentStatus = paymentStatus;
         }
+        order.updatedAt = Date.now();
+        await order.save();
+        return order;
+    },
+
+    async payForOrder(id) {
+        const order = await Order.findById(id);
+        if (!order) {
+            const error = new Error('Order not found');
+            error.code = 404;
+            throw error;
+        }
+        if (order.paymentStatus === 'Paid') {
+            const error = new Error('Order is already paid');
+            error.code = 400;
+            throw error;
+        }
+        order.paymentStatus = 'Paid';
+        if (order.status === 'Pending') {
+            order.status = 'In Progress';
+        }
+        order.updatedAt = Date.now();
+        await order.save();
+        return order;
+    },
+    
+    async refundOrder(id) {
+        const order = await Order.findById(id);
+        if (!order) {
+            const error = new Error('Order not found');
+            error.code = 404;
+            throw error;
+        }
+        if (order.paymentStatus !== 'Paid') {
+            const error = new Error('Only paid orders can be refunded');
+            error.code = 400;
+            throw error;
+        }
+        order.paymentStatus = 'Refunded';
         order.updatedAt = Date.now();
         await order.save();
         return order;

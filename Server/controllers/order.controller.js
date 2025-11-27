@@ -163,10 +163,62 @@ async function updateOrderStatus(req, res) {
     }
 }
 
+async function payOrder(req, res) {
+    try {
+        const { id } = req.params;
+        const order = await orderService.getOrderById(id);
+        
+        // Only allow order owner or Admin to pay
+        const requesterId = req.user.id;
+        const requesterRole = req.user.role;
+        if (requesterRole !== 'Admin' && String(order.customerId) !== String(requesterId)) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'You can only pay for your own orders' 
+            });
+        }
+
+        const paidOrder = await orderService.payForOrder(id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Payment successful',
+            data: paidOrder
+        });
+    } catch (error) {
+        const statusCode = error.code || 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+async function refundOrder(req, res) {
+    try {
+        const { id } = req.params;
+        const refundedOrder = await orderService.refundOrder(id);
+
+        res.status(200).json({
+            success: true,
+            message: 'Order refunded successfully',
+            data: refundedOrder
+        });
+    } catch (error) {
+        const statusCode = error.code || 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
 module.exports = {
     createOrder,
     getOrderById,
     getOrdersByCustomerId,
     getAllOrders,
-    updateOrderStatus
+    updateOrderStatus,
+    payOrder,
+    refundOrder
 };

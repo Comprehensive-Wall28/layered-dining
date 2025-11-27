@@ -40,6 +40,10 @@ class CartService {
 
         if (!item || !item.menuItemId) throw new Error('menuItemId is required');
 
+        // validate that the menu item exists
+        const menuDoc = await MenuItem.findById(item.menuItemId);
+        if (!menuDoc) throw new Error('Menu item not found');
+
         const existingItem = cart.items.find(i => i.menuItemId.toString() === item.menuItemId.toString());
 
         if (existingItem) {
