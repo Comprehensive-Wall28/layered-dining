@@ -1,39 +1,54 @@
 const mongoose = require('mongoose');
+// Ensure Cart model is registered before Order (so refs resolve)
+require('./cart');
 
 const orderSchema = new mongoose.Schema({
-    userId:{
+    customerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true,
     },
-    components:{
-        type: [String],
+
+    customerName: {
+        type: String,
         required: true,
     },
-    status:{
+    orderType: {
+        type : String,
+         enum: ['Dine-In', 'Takeaway', 'Delivery'],
+        required: true,
+        default: 'Dine-In'
+    },
+    status: {
         type: String,
-        default: 'PENDING',
-        enum: ['PENDING', 'COMPLETED', 'CANCELLED']
+        enum: ['Pending','In Progress', 'Completed', 'Cancelled'],
+        required: true,
+        default: 'In Progress'
+    },
+    totalPrice: {
+        type: Number,
+        required: true
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['Paid', 'Unpaid', 'Refunded'],
+        required: true,
+        default: 'Unpaid'
     },
     createdAt: {
         type: Date,
-        default: Date.now,
+        required: true,
+        default: Date.now
     },
     updatedAt: {
         type: Date,
-        default: Date.now,
+        default: Date.now
     },
-    managerId:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: false,
-    },
-    customDeliveryTime:{
-        type: Date,
-        required: false,
+    customerNotes: {
+        type: String,
+        required: false
     }
-})
+});
 
-
-const Order = mongoose.model('Order', orderSchema);
-module.exports = Order;
+mongoose.model('Order', orderSchema);
+module.exports = mongoose.model('Order', orderSchema);

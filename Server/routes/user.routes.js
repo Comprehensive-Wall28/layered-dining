@@ -13,6 +13,7 @@ const ROLES = {
 
 //user routes
 router.get("/",authenticationMiddleware,userController.getCurrentUser);
+router.get("/cart", authenticationMiddleware, userController.getCartId);
 router.put("/profile", authenticationMiddleware, userController.updateUserProfile)
 router.get("/log/:id", authenticationMiddleware, authorizationMiddleware([ROLES.ADMIN]), userController.getLogs)
 

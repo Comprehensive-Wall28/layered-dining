@@ -3,7 +3,7 @@ const userService = require("../services/user.service");
 
 const userController = {
 
-    deleteAccount: async (req, res) => {
+    deleteAccount: async (req, res) => { //can manager also do it?
         try {
             const { id } = req.params;
 
@@ -29,7 +29,7 @@ const userController = {
         }
     },
 
-    getCurrentUser: async (req, res) => {
+    getCurrentUser: async (req, res) => { //can manager also do it?
         try {
             const {id} = req.user;
             //call service
@@ -60,7 +60,25 @@ const userController = {
         }
     },
 
+    getCartId: async (req, res) => {
+        try {
+            const { id } = req.user;
+            const cartId = await userService.getCartId(id);
+
+            res.status(200).json({
+                status: 'success',
+                cartId
+            });
+        } catch (error) {
+            res.status(error.code || 500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
     updateUserProfile: async (req, res) => {
+    updateUserProfile: async (req, res) => { //can manager also do it?
         try {
             const {id} = req.user;
             const {name, email, password} = req.body;
@@ -88,7 +106,7 @@ const userController = {
         }   
     },
 
-    getLogs: async (req, res) => {
+    getLogs: async (req, res) => { //what does this do?
         try {
             const {id} = req.params;
             //call service

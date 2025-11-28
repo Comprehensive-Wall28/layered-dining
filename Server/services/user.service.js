@@ -119,7 +119,7 @@ const customerService = {
      */
     async getLogs(id) {
         if (!id) {
-            const error = new error('No ID provided');
+            const error = new Error('No ID provided');
             error.code = 400;
             throw error;
         }
@@ -133,68 +133,48 @@ const customerService = {
         }
         return logs;
     },
+
     /**
-     * Create new feedback
+     * Get cart id for a user
      * @param {ID} id - The user's ID.
-     * @param {STRING} feedback - The user's feedback text
-     * @returns {string} Confirmation
-     * @throws {Error} If feedback not provided
+     * @returns {ObjectId} The user's cart id
+     * @throws {Error} If user not found or ID not provided
      */
-    async createFeedback(id, feedback, rating) {
-        if(!feedback){
-            const error = new Error('No feedback provided');
-            error.code = 400;
-            throw error;
-        }
-        const newFeedback = new FeedbackModel({
-            userId: id,
-            feedback: feedback,
-            rating: rating
-        });
-        await newFeedback.save();
-        const log = new LogModel({
-            action: 'CREATE',
-            description: 'New feedback created successfully',
-            severity: 'NOTICE',
-            type: 'SUCCESS',
-            affectedDocument: newFeedback._id,
-            affectedModel: 'Feedback',
-            userId: id,
-        });
-        await log.save();
-        return {
-            message: 'Feedback created successfully'
-        }
-    },
-    /**
-     * Get feedback details
-     * @param {ID} id - The feedback's ID.
-     * @returns {string} Feedback
-     * @throws {Error} If ID not provided
-     */
-    async getFeedback(id) {
-        if(!id){
-            const error = new Error('No feedback ID provided');
+    async getCartId(id) {
+        if (!id) {
+            const error = new Error('No ID provided');
             error.code = 400;
             throw error;
         }
 
-        const feedback = await FeedbackModel.findById(id);
-        if(!feedback){
-            const error = new Error('No feedback found for corresponding ID');
+        const user = await UserModel.findById(id);
+        if (!user) {
+            const error = new Error('User not found');
             error.code = 404;
             throw error;
         }
-        return feedback;
+
+        return user.cart;
     },
-    /**
-     * Get all feedback
-     * @returns {string} Feedback
-     */
-    async getAllFeedback() {
-        const feedback = await FeedbackModel.find();
-        return feedback;
+
+    async setCartId(userId, cartId) {
+        if (!userId) {
+            const error = new Error('No user ID provided');
+            error.code = 400;
+            throw error;
+        }
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+        user.cart = cartId;
+        await user.save();
+        return user.cart;
     }
-}
+
+
+};
 
 module.exports = customerService;
