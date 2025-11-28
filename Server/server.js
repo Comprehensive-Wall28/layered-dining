@@ -32,7 +32,6 @@ const tableRouter = require("./routes/table.routes.js")
 const orderRouter = require("./routes/order.routes.js")
 const cartRouter = require('./routes/cart.routes.js');
 
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
@@ -42,7 +41,6 @@ app.use(cors({
   credentials: true,
 }));
 
-
 //use routes
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/auth", authRouter);
@@ -51,62 +49,11 @@ app.use("/api/v1/tables", tableRouter);
 app.use("/api/v1/menu", menuRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/cart", cartRouter);
+
 // Primary Test Route "http://localhost:PORT/"
 app.get('/', (req, res) => {
   res.send('Welcome! Backend started successfully.')
 })
-
-// Debug route to check all registered routes
-app.get('/debug/routes', (req, res) => {
-  const routes = [];
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) {
-      routes.push({
-        path: middleware.route.path,
-        methods: Object.keys(middleware.route.methods)
-      });
-    } else if (middleware.name === 'router') {
-      middleware.handle.stack.forEach((handler) => {
-        if (handler.route) {
-          routes.push({
-            path: handler.route.path,
-            methods: Object.keys(handler.route.methods)
-          });
-        }
-      });
-    }
-  });
-  res.json({ routes });
-})
-
-cron.schedule('0 0 * * 0', async () => {
-    console.log("Running weekly low-stock check...");
-    try {
-        const items = await Item.find({});
-        const managers = await User.find({ type: 'manager' });
-
-        for (let item of items) {
-            if (item.lOWarningThreshold !== undefined && item.quantity <= item.lOWarningThreshold) {
-                for (let manager of managers) {
-                    // Avoid duplicate notifications
-                    const alreadyNotified = manager.notifications.some(
-                        n => n.title === `Low Stock Alert: ${item.name}` && !n.read
-                    );
-
-                    if (!alreadyNotified) {
-                        manager.notifications.push({
-                            title: `Low Stock Alert: ${item.name}`,
-                            message: `The item "${item.name}" is low. Quantity left: ${item.quantity} ${item.unit || ''}.`
-                        });
-                        await manager.save();
-                    }
-                }
-            }
-        }
-    } catch (err) {
-        console.error("Error in weekly low-stock check:", err);
-    }
-});
 
 //Default Error
 app.use((err, req, res, next) => {

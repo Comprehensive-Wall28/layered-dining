@@ -1,35 +1,5 @@
 const mongoose = require('mongoose');
 
-<<<<<<< HEAD
-const menuSchema = new mongoose.Schema({
-    isAvailable: {
-        type: Boolean,
-        required: true,
-    },
-    managerId:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-    },
-    items:{
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: 'Item',
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        default: Date.now,
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now,
-    },
-})
-
-
-const Menu = mongoose.model('Menu', menuSchema);
-module.exports = Menu;
-=======
 const menuItemSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -89,4 +59,3 @@ menuItemSchema.pre('save', function(next) {
 
 const MenuItem = mongoose.model('MenuItem', menuItemSchema);
 module.exports = MenuItem;
->>>>>>> origin/test
