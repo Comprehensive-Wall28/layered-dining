@@ -12,7 +12,6 @@ const ROLES = {
 };
 
 // Public routes - SPECIFIC ROUTES FIRST!
-router.get("/search", menuController.searchMenuItems);
 router.get("/category/:category", menuController.getMenuByCategory);
 router.get("/", menuController.getAllMenuItems);
 // WILDCARD ROUTE LAST!

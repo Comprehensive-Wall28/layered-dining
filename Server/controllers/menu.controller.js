@@ -128,34 +128,6 @@ const menuController = {
         }
     },
 
-    searchMenuItems: async (req, res) => {
-        try {
-            const { q } = req.query;
-
-            if (!q) {
-                return res.status(400).json({
-                    status: 'error',
-                    message: 'Search query is required'
-                });
-            }
-
-            const menuItems = await menuService.searchMenuItems(q);
-
-            res.status(200).json({
-                status: 'success',
-                searchTerm: q,
-                count: menuItems.length,
-                menuItems
-            });
-
-        } catch (error) {
-            const statusCode = error.code || 500;
-            res.status(statusCode).json({
-                status: 'error',
-                message: error.message
-            });
-        }
-    }
 };
 
 module.exports = menuController;

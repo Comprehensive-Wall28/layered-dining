@@ -187,28 +187,6 @@ const menuService = {
         }
     },
 
-    async searchMenuItems(searchTerm) {
-        try {
-            const menuItems = await MenuItem.find({
-                $and: [
-                    { isAvailable: true },
-                    {
-                        $or: [
-                            { name: { $regex: searchTerm, $options: 'i' } },
-                            { description: { $regex: searchTerm, $options: 'i' } },
-                            { tags: { $in: [new RegExp(searchTerm, 'i')] } }
-                        ]
-                    }
-                ]
-            }).sort({ name: 1 });
-
-            return menuItems;
-        } catch (error) {
-            const newError = new Error('Failed to search menu items: ' + error.message);
-            newError.code = 500;
-            throw newError;
-        }
-    }
 };
 
 module.exports = menuService;
