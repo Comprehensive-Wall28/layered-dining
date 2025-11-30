@@ -6,69 +6,6 @@ const orderService = require("../services/order.service");
 const managerController = {
 
 
-    getCurrentUser: async (req, res) => { 
-        try {
-            const {id} = req.user;
-            //call service
-            const user = await userService.getCurrentUser(id);
-
-            res.status(200).json({
-                status: 'success',
-                user
-            });
-
-        } catch (error) {
-            if (error.code == 404) { //user not found
-                res.status(404).json({
-                    status: 'error',
-                    message: error.message
-                });
-            } else if(error.code == 400) { //ID not provided
-                res.status(400).json({
-                    status: 'error',
-                    message: error.message
-                });
-            } else {
-                res.status(500).json({ //Server error
-                    status: 'error',
-                    message: error.message
-                });
-            }
-        }
-    },
-
-
-    // getCurrentOrder: async (req, res) =>
-    // {
-    //    try {
-    //         const {id} = req.order;
-    //         //call service
-    //         const order = await userService.getOrderById(id);
-
-    //         res.status(200).json({
-    //             status: 'success',
-    //             order
-    //         });
-
-    //     } catch (error) {
-    //         if (error.code == 404) { //order not found
-    //             res.status(404).json({
-    //                 status: 'error',
-    //                 message: error.message
-    //             });
-    //         } else if(error.code == 400) { //ID not provided
-    //             res.status(400).json({
-    //                 status: 'error',
-    //                 message: error.message
-    //             });
-    //         } else {
-    //             res.status(500).json({ //Server error
-    //                 status: 'error',
-    //                 message: error.message
-    //             });
-    //         }
-    //     }
-    // },
 
     acceptOrder: async (req, res)=>
     {
