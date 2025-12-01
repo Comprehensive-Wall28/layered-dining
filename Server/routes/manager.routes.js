@@ -12,6 +12,6 @@ const ROLES = {
 };
 
 router.put("/:id/status", authenticationMiddleware, authorizationMiddleware([ROLES.MANAGER]),managerController.updateOrderStatus);
-router.put("/:id/status", authenticationMiddleware, authorizationMiddleware([ROLES.MANAGER]), managerController.acceptOrder);
+
 
 module.exports = router;
