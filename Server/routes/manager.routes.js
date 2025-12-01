@@ -5,13 +5,9 @@ const authenticationMiddleware = require('../middleware/authentication.middlewar
 const authorizationMiddleware = require('../middleware/authorization.middleware.js');
 const managerController = require("../controllers/manager.controller.js");
 
-const ROLES = {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-    CUSTOMER: 'Customer'
-};
+const ROLES = require('../config/roles.js');
 
-router.put("/:id/status", authenticationMiddleware, authorizationMiddleware([ROLES.MANAGER]),managerController.updateOrderStatus);
+router.put("/:id/status", authenticationMiddleware, authorizationMiddleware([ROLES.MANAGER]), managerController.updateOrderStatus);
 router.put("/:id/status", authenticationMiddleware, authorizationMiddleware([ROLES.MANAGER]), managerController.acceptOrder);
 
 module.exports = router;

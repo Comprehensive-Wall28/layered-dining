@@ -5,11 +5,7 @@ const authenticationMiddleware = require('../middleware/authentication.middlewar
 const authorizationMiddleware = require('../middleware/authorization.middleware');
 const menuController = require("../controllers/menu.controller");
 
-const ROLES = {
-    ADMIN: 'Admin',
-    MANAGER: 'Manager',
-    CUSTOMER: 'Customer'
-};
+const ROLES = require('../config/roles.js');
 
 // Public routes - SPECIFIC ROUTES FIRST!
 router.get("/category/:category", menuController.getMenuByCategory);
