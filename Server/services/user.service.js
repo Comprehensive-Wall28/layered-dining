@@ -1,9 +1,10 @@
 const UserModel = require('../models/user');
 const LogModel = require('../models/log');
+const FeedbackModel = require('../models/feedback');
 
 const customerService = {
 
-     /**
+    /**
      * Delete user account
      * @param {ID} id - The user's ID.
      * @returns {string} The deleted user's details
@@ -33,7 +34,7 @@ const customerService = {
             message: 'User deleted successfully'
         }
     },
-     /**
+    /**
      * Get user account
      * @param {ID} id - The user's ID.
      * @returns {string} The user's details
@@ -61,7 +62,7 @@ const customerService = {
             role: user.role
         }
     },
-     /**
+    /**
      * Update user account details, not all parameters are required, only one is.
      * @param {ID} id - The user's ID.
      * @param {NAME} name - The user's new name
@@ -118,7 +119,7 @@ const customerService = {
      */
     async getLogs(id) {
         if (!id) {
-            const error = new error('No ID provided');
+            const error = new Error('No ID provided');
             error.code = 400;
             throw error;
         }
@@ -131,6 +132,46 @@ const customerService = {
             throw error;
         }
         return logs;
+    },
+
+    /**
+     * Get cart id for a user
+     * @param {ID} id - The user's ID.
+     * @returns {ObjectId} The user's cart id
+     * @throws {Error} If user not found or ID not provided
+     */
+    async getCartId(id) {
+        if (!id) {
+            const error = new Error('No ID provided');
+            error.code = 400;
+            throw error;
+        }
+
+        const user = await UserModel.findById(id);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+
+        return user.cart;
+    },
+
+    async setCartId(userId, cartId) {
+        if (!userId) {
+            const error = new Error('No user ID provided');
+            error.code = 400;
+            throw error;
+        }
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+        user.cart = cartId;
+        await user.save();
+        return user.cart;
     }
 
 
