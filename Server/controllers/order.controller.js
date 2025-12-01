@@ -89,6 +89,28 @@ async function getOrderById(req, res) {
 }
 
 /**
+ * Get order status
+ * GET /api/orders/:id/status
+ */
+async function getOrderStatus(req, res) {
+    try {
+        const { id } = req.params;
+        const status = await orderService.getOrderStatus(id);
+
+        res.status(200).json({
+            success: true,
+            data: status
+        });
+    } catch (error) {
+        const statusCode = error.code || 500;
+        res.status(statusCode).json({
+            success: false,
+            message: error.message
+        });
+    }
+}
+
+/**
  * Get orders by customer ID
  * GET /api/orders/customer/:customerId
  */
@@ -167,14 +189,14 @@ async function payOrder(req, res) {
     try {
         const { id } = req.params;
         const order = await orderService.getOrderById(id);
-        
+
         // Only allow order owner or Admin to pay
         const requesterId = req.user.id;
         const requesterRole = req.user.role;
         if (requesterRole !== 'Admin' && String(order.customerId) !== String(requesterId)) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'You can only pay for your own orders' 
+            return res.status(403).json({
+                success: false,
+                message: 'You can only pay for your own orders'
             });
         }
 
@@ -220,5 +242,6 @@ module.exports = {
     getAllOrders,
     updateOrderStatus,
     payOrder,
-    refundOrder
+    refundOrder,
+    getOrderStatus
 };

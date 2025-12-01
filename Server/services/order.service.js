@@ -66,6 +66,16 @@ const orderService = {
         return order;
     },
 
+    async getOrderStatus(id) {
+        const order = await Order.findById(id).select('status');
+        if (!order) {
+            const error = new Error('Order not found');
+            error.code = 404;
+            throw error;
+        }
+        return { status: order.status };
+    },
+
     async getOrdersByCustomerId(customerId) {
         return await Order.find({ customerId });
     },
@@ -112,7 +122,7 @@ const orderService = {
         await order.save();
         return order;
     },
-    
+
     async refundOrder(id) {
         const order = await Order.findById(id);
         if (!order) {

@@ -12,6 +12,7 @@ router.post('/', authMiddleware, authorizationMiddleware([ROLES.CUSTOMER]), orde
 router.get('/', authMiddleware, authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]), orderController.getAllOrders);
 router.get('/customer/:customerId', authMiddleware, orderController.getOrdersByCustomerId);
 router.get('/:id', authMiddleware, orderController.getOrderById);
+router.get('/:id/status', authMiddleware, orderController.getOrderStatus);
 router.put('/:id/status', authMiddleware, authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]), orderController.updateOrderStatus);
 router.post('/:id/pay', authMiddleware, orderController.payOrder);
 router.post('/:id/refund', authMiddleware, authorizationMiddleware([ROLES.ADMIN, ROLES.MANAGER]), orderController.refundOrder);
