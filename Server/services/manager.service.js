@@ -15,27 +15,17 @@ const managerService = {
         customerService.getCurrentUser(id);
     },
 
-    async acceptOrder({orderID}){
+    async acceptOrder(){
 
-        if (!orderID) {
-
-            const error = new Error('Order ID is required');
-            error.code = 400;
-            throw error;
-        }
-        else{
-            orderID.status = 'Accepted'
-        }
-
+            this.status = 'Accepted'
     },
 
-    async updateOrderStatus({orderID, newStatus}){
+    async updateOrderStatus({newStatus}){
 
-        const order = new Order(getOrderById(orderID));
         
-        if(!orderID){
+        if(newStatus == null){
             
-            const error = new Error('Order ID is required');
+            const error = new Error('status is required');
             error.code = 400;
             throw error;
 
@@ -43,7 +33,7 @@ const managerService = {
 
         else{
 
-            order.status = newStatus
+            this.status = newStatus
 
         }
         
