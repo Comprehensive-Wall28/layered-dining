@@ -91,5 +91,26 @@ export const reservationService = {
         } catch (error) {
             throw error;
         }
+    },
+
+    async cancelReservation(id: string) {
+        try {
+            const response = await fetch(`${API_URL}/cancel/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to cancel reservation');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
     }
 };
