@@ -11,7 +11,11 @@ import {
   Card,
   CardContent,
   Stack,
-  IconButton
+  IconButton,
+  Avatar,
+  Menu,
+  MenuItem,
+  Tooltip
 } from '@mui/material';
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu';
 import TableBarIcon from '@mui/icons-material/TableBar';
@@ -20,8 +24,22 @@ import FormatQuoteIcon from '@mui/icons-material/FormatQuote';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import TwitterIcon from '@mui/icons-material/Twitter';
 import InstagramIcon from '@mui/icons-material/Instagram';
+import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
+  const { user, logout } = useAuth();
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
+  };
+
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', flexDirection: 'column', display: 'flex' }}>
       {/* Navigation */}
@@ -35,19 +53,54 @@ export default function Home() {
               <Button color="inherit" component="a" href="/">Home</Button>
               <Button color="inherit">Menu</Button>
               <Button color="inherit">Details</Button>
-              {/* <Button variant="contained" color="primary">Book a Table</Button> */}
-              {/* <Button variant="outlined" color="primary">Order Online</Button> */}
 
-              <Button color="inherit" component="a" href="/login">Login</Button>
-              <Button
-                variant="contained"
-                color="primary"
-                component="a"
-                href="/register"
-                sx={{ borderRadius: '20px', px: 3 }}
-              >
-                Register
-              </Button>
+              {!user ? (
+                <>
+                  <Button color="inherit" component={Link} href="/login">Login</Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    component={Link}
+                    href="/register"
+                    sx={{ borderRadius: '20px', px: 3 }}
+                  >
+                    Register
+                  </Button>
+                </>
+              ) : (
+                <Box sx={{ flexGrow: 0, ml: 2 }}>
+                  <Tooltip title="Open settings">
+                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                      <Avatar sx={{ bgcolor: 'secondary.main' }}>
+                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
+                      </Avatar>
+                    </IconButton>
+                  </Tooltip>
+                  <Menu
+                    sx={{ mt: '45px' }}
+                    id="menu-appbar"
+                    anchorEl={anchorElUser}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    open={Boolean(anchorElUser)}
+                    onClose={handleCloseUserMenu}
+                  >
+                    <MenuItem component={Link} href="/dashboard" onClick={handleCloseUserMenu}>
+                      <Typography textAlign="center">Dashboard</Typography>
+                    </MenuItem>
+                    <MenuItem onClick={() => { handleCloseUserMenu(); logout(); }}>
+                      <Typography textAlign="center">Logout</Typography>
+                    </MenuItem>
+                  </Menu>
+                </Box>
+              )}
             </Box>
           </Toolbar>
         </Container>
