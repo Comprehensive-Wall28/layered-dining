@@ -13,10 +13,11 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,7 +29,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await authService.login({ email, password });
+            await login({ email, password });
             router.push('/dashboard'); // Redirect to dashboard
         } catch (err: any) {
             setError(err.message || 'Failed to login');
