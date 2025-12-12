@@ -270,6 +270,21 @@ const userController = {
                 message: error.message
             });
         }
+    },
+
+    getDashboardStats: async (req, res) => {
+        try {
+            const stats = await userService.getDashboardStats();
+            res.status(200).json({
+                status: 'success',
+                stats
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
     }
 }
 module.exports = userController;

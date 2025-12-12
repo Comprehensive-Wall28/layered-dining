@@ -15,10 +15,13 @@ import {
     TextField,
     Stack,
     IconButton,
-    Tooltip
+    Tooltip,
+    Tabs,
+    Tab
 } from '@mui/material';
 import { Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
 import { authService } from '../../services/authService';
+import StatsGraph from '../../components/Admin/StatsGraph';
 
 export default function AdminDashboardPage() {
     const router = useRouter();
@@ -52,6 +55,12 @@ export default function AdminDashboardPage() {
         checkAuth();
     }, [router]);
 
+    const [tabValue, setTabValue] = useState(0);
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+        setTabValue(newValue);
+    };
+
     const handleLogout = async () => {
         await authService.logout();
         router.replace('/login');
@@ -75,71 +84,96 @@ export default function AdminDashboardPage() {
                 Admin Dashboard
             </Typography>
 
-            <Grid container spacing={4}>
-                <Grid size={{ xs: 12 }}>
-                    <Paper
-                        elevation={0}
-                        sx={{
-                            p: 4,
-                            border: '1px solid rgba(0, 0, 0, 0.05)',
-                            borderRadius: 3,
-                            textAlign: 'center'
-                        }}
-                    >
-                        <Avatar
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Tabs value={tabValue} onChange={handleTabChange} aria-label="admin dashboard tabs">
+                    <Tab label="Statistics" />
+                    <Tab label="Management" />
+                    <Tab label="Details" />
+                </Tabs>
+            </Box>
+
+            {/* Statistics Tab */}
+            <div role="tabpanel" hidden={tabValue !== 0}>
+                {tabValue === 0 && (
+                    <Box sx={{ p: 0 }}>
+                        <StatsGraph />
+                    </Box>
+                )}
+            </div>
+
+            {/* Management Tab */}
+            <div role="tabpanel" hidden={tabValue !== 1}>
+                {tabValue === 1 && (
+                    <Box sx={{ p: 0 }}>
+                        <UserTable />
+                    </Box>
+                )}
+            </div>
+
+            {/* Details Tab */}
+            <div role="tabpanel" hidden={tabValue !== 2}>
+                {tabValue === 2 && (
+                    <Box sx={{ p: 0 }}>
+                        <Paper
+                            elevation={0}
                             sx={{
-                                width: 120,
-                                height: 120,
-                                bgcolor: 'primary.main',
-                                fontSize: '3rem',
-                                margin: '0 auto',
-                                mb: 2
+                                p: 4,
+                                border: '1px solid rgba(0, 0, 0, 0.05)',
+                                borderRadius: 3,
+                                textAlign: 'center'
                             }}
                         >
-                            {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
-                        </Avatar>
-                        <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                            {user.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                            {user.role}
-                        </Typography>
-
-                        <Divider sx={{ my: 3 }} />
-
-                        <Box sx={{ mb: 3, textAlign: 'left' }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                Email Address
+                            <Avatar
+                                sx={{
+                                    width: 120,
+                                    height: 120,
+                                    bgcolor: 'primary.main',
+                                    fontSize: '3rem',
+                                    margin: '0 auto',
+                                    mb: 2
+                                }}
+                            >
+                                {user.name ? user.name.charAt(0).toUpperCase() : 'A'}
+                            </Avatar>
+                            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                                {user.name}
                             </Typography>
-                            <Typography variant="body1">
-                                {user.email}
+                            <Typography variant="body2" color="text.secondary">
+                                {user.role}
                             </Typography>
-                        </Box>
 
-                        <Box sx={{ mb: 3, textAlign: 'left' }}>
-                            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                                Account Status
-                            </Typography>
-                            <Typography variant="body1">
-                                Active
-                            </Typography>
-                        </Box>
+                            <Divider sx={{ my: 3 }} />
 
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={handleLogout}
-                            sx={{ mt: 2, width: '100%' }}
-                        >
-                            Sign Out
-                        </Button>
-                    </Paper>
-                </Grid>
+                            <Box sx={{ mb: 3, textAlign: 'left' }}>
+                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                    Email Address
+                                </Typography>
+                                <Typography variant="body1">
+                                    {user.email}
+                                </Typography>
+                            </Box>
 
-                <Grid size={{ xs: 12 }}>
-                    <UserTable />
-                </Grid>
-            </Grid>
+                            <Box sx={{ mb: 3, textAlign: 'left' }}>
+                                <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                                    Account Status
+                                </Typography>
+                                <Typography variant="body1">
+                                    Active
+                                </Typography>
+                            </Box>
+
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={handleLogout}
+                                sx={{ mt: 2, width: '100%' }}
+                            >
+                                Sign Out
+                            </Button>
+                        </Paper>
+                    </Box>
+                )}
+            </div>
         </Container >
     );
 }

@@ -1,6 +1,8 @@
 const UserModel = require('../models/user');
 const LogModel = require('../models/log');
 const FeedbackModel = require('../models/feedback');
+const OrderModel = require('../models/order');
+const ReservationModel = require('../models/reservation');
 
 const customerService = {
 
@@ -318,6 +320,57 @@ const customerService = {
         await log.save();
 
         return user;
+    },
+
+    /**
+     * Get dashboard stats (Orders and Reservations per day)
+     */
+    async getDashboardStats() {
+        // Aggregate Orders by day
+        const orderStats = await OrderModel.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    orders: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Aggregate Reservations by day
+        const reservationStats = await ReservationModel.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$reservationDate" } },
+                    reservations: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Merge results
+        const statsMap = {};
+
+        orderStats.forEach(stat => {
+            const date = stat._id;
+            if (!statsMap[date]) statsMap[date] = { date, orders: 0, reservations: 0 };
+            statsMap[date].orders = stat.orders;
+        });
+
+        reservationStats.forEach(stat => {
+            const date = stat._id;
+            if (!statsMap[date]) statsMap[date] = { date, orders: 0, reservations: 0 };
+            statsMap[date].reservations = stat.reservations;
+        });
+
+        // Convert to array and sort by date
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const result = Object.values(statsMap)
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+        // Optional: Filter for last 30 days or similar if needed, but for now return all
+        // .filter(item => new Date(item.date) >= sevenDaysAgo);
+
+        return result;
     }
 
 

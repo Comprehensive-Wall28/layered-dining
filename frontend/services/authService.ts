@@ -156,5 +156,28 @@ export const authService = {
             console.error("Update User failed", error);
             throw error;
         }
+    },
+
+    async getStats() {
+        try {
+            const response = await fetch(`${API_URL_USER}/stats`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch stats');
+            }
+
+            const data = await response.json();
+            return data.stats;
+        } catch (error) {
+            console.error("Get Stats failed", error);
+            throw error;
+        }
     }
 };
