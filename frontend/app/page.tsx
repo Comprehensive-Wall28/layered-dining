@@ -125,7 +125,14 @@ export default function Home() {
             A culinary journey through taste, texture, and tradition.
           </Typography>
           <Stack direction="row" spacing={2} justifyContent="center">
-            <Button variant="contained" color="secondary" size="large" startIcon={<TableBarIcon />}>
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              startIcon={<TableBarIcon />}
+              component={Link}
+              href="/reservation"
+            >
               Reserve a Table
             </Button>
             <Button variant="outlined" sx={{ color: 'primary.main', borderColor: 'primary.main', '&:hover': { borderColor: 'primary.dark', bgcolor: 'rgba(0,0,0,0.05)' } }} size="large" startIcon={<DeliveryDiningIcon />}>

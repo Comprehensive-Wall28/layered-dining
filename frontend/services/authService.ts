@@ -1,5 +1,6 @@
-const API_URL = 'http://localhost:5000/api/v1/auth';
-const API_URL_USER = 'http://localhost:5000/api/v1/user';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API_URL = `${API_BASE_URL}/api/v1/auth`;
+const API_URL_USER = `${API_BASE_URL}/api/v1/user`;
 
 export const authService = {
     async login(data: any) {
