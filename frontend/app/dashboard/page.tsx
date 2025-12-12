@@ -110,7 +110,7 @@ export default function DashboardPage() {
                         elevation={0}
                         sx={{
                             p: 4,
-                            border: '1px solid #e0e0e0',
+                            border: '1px solid rgba(0, 0, 0, 0.05)',
                             borderRadius: 3,
                             textAlign: 'center'
                         }}
@@ -170,7 +170,7 @@ export default function DashboardPage() {
                         elevation={0}
                         sx={{
                             p: 4,
-                            border: '1px solid #e0e0e0',
+                            border: '1px solid rgba(0, 0, 0, 0.05)',
                             borderRadius: 3,
                             minHeight: '400px'
                         }}
@@ -179,12 +179,15 @@ export default function DashboardPage() {
                             Recent Activity
                         </Typography>
 
-                        <Timeline position="alternate">
+                        <Timeline position="right">
                             {timelineItems.length > 0 ? (
                                 timelineItems.map((item, index) => (
                                     <TimelineItem key={index}>
-                                        <TimelineOppositeContent color="text.secondary">
-                                            {item.date.toLocaleDateString()} {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        <TimelineOppositeContent color="text.secondary" sx={{ py: '12px', px: 2 }}>
+                                            {item.date.toLocaleDateString()}
+                                            <Typography variant="caption" display="block" color="text.secondary">
+                                                {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </Typography>
                                         </TimelineOppositeContent>
                                         <TimelineSeparator>
                                             <TimelineDot color={item.type === 'reservation' ? 'primary' : 'success'}>
@@ -192,16 +195,32 @@ export default function DashboardPage() {
                                             </TimelineDot>
                                             {index < timelineItems.length - 1 && <TimelineConnector />}
                                         </TimelineSeparator>
-                                        <TimelineContent>
-                                            <Typography variant="h6" component="span">
-                                                {item.type === 'reservation' ? 'Table Reservation' : 'Order Placed'}
-                                            </Typography>
-                                            <Typography>
-                                                {item.type === 'reservation'
-                                                    ? `Party of ${item.data.partySize} • ${item.data.status}`
-                                                    : `Total: $${item.data.totalAmount} • ${item.data.status}`
-                                                }
-                                            </Typography>
+                                        <TimelineContent sx={{ py: '12px', px: 2 }}>
+                                            <Paper
+                                                elevation={0}
+                                                onClick={() => router.push(
+                                                    item.type === 'reservation'
+                                                        ? `/reservation/${item.data._id}`
+                                                        : `/orders/${item.data._id}`
+                                                )}
+                                                sx={{
+                                                    p: 2,
+                                                    cursor: 'pointer',
+                                                    '&:hover': { bgcolor: 'action.hover' },
+                                                    border: '1px solid rgba(0, 0, 0, 0.05)',
+                                                    borderRadius: 2
+                                                }}
+                                            >
+                                                <Typography variant="h6" component="span" sx={{ fontSize: '1rem', fontWeight: 600 }}>
+                                                    {item.type === 'reservation' ? 'Table Reservation' : 'Order Placed'}
+                                                </Typography>
+                                                <Typography variant="body2" color="text.secondary">
+                                                    {item.type === 'reservation'
+                                                        ? `Party of ${item.data.partySize} • ${item.data.status}`
+                                                        : `Total: $${item.data.totalAmount.toFixed(2)} • ${item.data.status}`
+                                                    }
+                                                </Typography>
+                                            </Paper>
                                         </TimelineContent>
                                     </TimelineItem>
                                 ))
@@ -216,6 +235,6 @@ export default function DashboardPage() {
                     </Paper>
                 </Grid>
             </Grid>
-        </Container>
+        </Container >
     );
 }

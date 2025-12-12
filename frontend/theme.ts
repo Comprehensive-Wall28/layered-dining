@@ -61,7 +61,7 @@ const theme = createTheme({
                     backgroundColor: '#ffffff',
                     color: '#1a1a1a',
                     boxShadow: 'none',
-                    borderBottom: '1px solid #eaeaea'
+                    borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
                 }
             }
         }

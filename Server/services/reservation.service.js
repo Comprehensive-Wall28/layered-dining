@@ -298,14 +298,14 @@ Reservation Details:
      */
     async createReservation(reservationData, user, targetCustomerId) {
         try {
-            const { 
-                tableId, 
-                partySize, 
-                reservationDate, 
-                startTime, 
-                endTime, 
-                customerName, 
-                customerEmail, 
+            const {
+                tableId,
+                partySize,
+                reservationDate,
+                startTime,
+                endTime,
+                customerName,
+                customerEmail,
                 customerPhone,
                 specialRequests,
                 occasion
@@ -346,13 +346,13 @@ Reservation Details:
                 });
 
                 // Find reservations that overlap with the requested time
-                const overlappingReservations = conflictingReservations.filter(reservation => 
+                const overlappingReservations = conflictingReservations.filter(reservation =>
                     this.timeOverlap(startTime, endTime, reservation.startTime, reservation.endTime)
                 );
 
                 let errorMessage = 'Table is not available at the requested time.';
                 if (overlappingReservations.length > 0) {
-                    const conflicts = overlappingReservations.map(r => 
+                    const conflicts = overlappingReservations.map(r =>
                         `${r.startTime} to ${r.endTime}`
                     ).join(', ');
                     errorMessage = `This table is already occupied during the following time slot(s): ${conflicts}. Please choose a different time or table.`;
@@ -405,7 +405,7 @@ Reservation Details:
             await newReservation.populate('userId', 'name email');
 
             // Send confirmation email in background (non-blocking)
-            this.sendReservationEmail(newReservation).catch(err => 
+            this.sendReservationEmail(newReservation).catch(err =>
                 console.error('Background email error:', err)
             );
 
@@ -440,6 +440,33 @@ Reservation Details:
     },
 
     /**
+     * Get reservation by ID
+     * @param {String} reservationId - Reservation ID
+     * @returns {Object} Reservation details
+     */
+    async getReservationById(reservationId) {
+        try {
+            const reservation = await ReservationModel.findById(reservationId)
+                .populate('tableId')
+                .populate('userId', 'name email');
+
+            if (!reservation) {
+                const error = new Error('Reservation not found');
+                error.code = 404;
+                throw error;
+            }
+
+            return reservation;
+
+        } catch (error) {
+            if (error.code) throw error;
+            const err = new Error('Error fetching reservation: ' + error.message);
+            err.code = 500;
+            throw err;
+        }
+    },
+
+    /**
      * Get all reservations (Admin/Manager only)
      * @param {Object} filters - Optional filters
      * @returns {Array} All reservations
@@ -447,17 +474,17 @@ Reservation Details:
     async getAllReservations(filters = {}) {
         try {
             const query = {};
-            
+
             if (filters.status) {
                 query.status = filters.status;
             }
-            
+
             if (filters.date) {
                 const searchDate = new Date(filters.date);
                 searchDate.setHours(0, 0, 0, 0);
                 const nextDay = new Date(searchDate);
                 nextDay.setDate(nextDay.getDate() + 1);
-                
+
                 query.reservationDate = {
                     $gte: searchDate,
                     $lt: nextDay
