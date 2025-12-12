@@ -24,6 +24,7 @@ import { authService } from '../../services/authService';
 import StatsGraph from '../../components/Admin/StatsGraph';
 import ReservationManagement from '../../components/Admin/ReservationManagement';
 import OrderManagement from '../../components/Admin/OrderManagement';
+import MenuManagement from '../../components/Admin/MenuManagement';
 
 export default function AdminDashboardPage() {
     const router = useRouter();
@@ -133,6 +134,18 @@ export default function AdminDashboardPage() {
                                     }}
                                 >
                                     <OrderManagement />
+                                </Paper>
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 4,
+                                        border: '1px solid rgba(0, 0, 0, 0.05)',
+                                        borderRadius: 3,
+                                    }}
+                                >
+                                    <MenuManagement />
                                 </Paper>
                             </Grid>
                         </Grid>
