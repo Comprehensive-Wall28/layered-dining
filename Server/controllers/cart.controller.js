@@ -39,7 +39,16 @@ class CartController {
             if (!cartId && req.user && req.user.id) {
                 cartId = await userService.getCartId(req.user.id);
             }
+
+            // Auto-create cart if it doesn't exist for authenticated user
+            if (!cartId && req.user && req.user.id) {
+                const newCart = await cartService.createCart(req.user.id);
+                cartId = newCart._id;
+                await userService.setCartId(req.user.id, cartId);
+            }
+
             if (!cartId) return res.status(400).json({ error: 'cartId is required' });
+
             const item = req.body;
             const cart = await cartService.addItem(cartId, item);
             res.json(cart);

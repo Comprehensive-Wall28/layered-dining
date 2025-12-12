@@ -137,7 +137,7 @@ export default function OrderTrackingPage() {
                             Order Details
                         </Typography>
                         <List dense>
-                            {order.items.map((item: any, index: number) => (
+                            {(order.items || []).map((item: any, index: number) => (
                                 <ListItem key={index}>
                                     <ListItemIcon>
                                         <RestaurantIcon fontSize="small" />
@@ -152,7 +152,7 @@ export default function OrderTrackingPage() {
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                             <Typography variant="h6">Total</Typography>
-                            <Typography variant="h6" color="primary">${order.totalAmount.toFixed(2)}</Typography>
+                            <Typography variant="h6" color="primary">${(order.totalPrice || 0).toFixed(2)}</Typography>
                         </Box>
                     </Grid>
 
@@ -170,7 +170,7 @@ export default function OrderTrackingPage() {
                         <Typography variant="subtitle2" color="text.secondary">
                             Payment Status
                         </Typography>
-                        <Typography variant="body1" paragraph>
+                        <Typography variant="body1" component="div" sx={{ mb: 2 }}>
                             <Chip label={order.paymentStatus} size="small" variant="outlined" />
                         </Typography>
 

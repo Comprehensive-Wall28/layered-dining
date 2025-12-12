@@ -110,7 +110,7 @@ export default function OrderManagement() {
                                         </div>
                                     ))}
                                 </TableCell>
-                                <TableCell>${(order.totalAmount || 0).toFixed(2)}</TableCell>
+                                <TableCell>${(order.totalPrice || 0).toFixed(2)}</TableCell>
                                 <TableCell>
                                     <Chip
                                         label={order.status}

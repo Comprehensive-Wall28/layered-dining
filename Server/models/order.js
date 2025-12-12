@@ -8,6 +8,16 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    items: {
+        type: [
+            {
+                menuItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+                quantity: { type: Number, required: true, min: 1 },
+                price: { type: Number, required: true } // Price at purchase
+            }
+        ],
+        required: true
+    },
 
     customerName: {
         type: String,

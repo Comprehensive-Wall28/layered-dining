@@ -71,7 +71,14 @@ export default function Home() {
             >
               Reserve a Table
             </Button>
-            <Button variant="outlined" sx={{ color: 'primary.main', borderColor: 'primary.main', '&:hover': { borderColor: 'primary.dark', bgcolor: 'rgba(0,0,0,0.05)' } }} size="large" startIcon={<DeliveryDiningIcon />}>
+            <Button
+              variant="outlined"
+              sx={{ color: 'primary.main', borderColor: 'primary.main', '&:hover': { borderColor: 'primary.dark', bgcolor: 'rgba(0,0,0,0.05)' } }}
+              size="large"
+              startIcon={<DeliveryDiningIcon />}
+              component={Link}
+              href="/menu"
+            >
               Order Online
             </Button>
           </Stack>

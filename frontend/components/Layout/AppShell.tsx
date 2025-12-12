@@ -22,6 +22,10 @@ import EventSeatIcon from '@mui/icons-material/EventSeat';
 import HomeIcon from '@mui/icons-material/Home';
 import Logo from '../Common/Logo';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Badge from '@mui/material/Badge';
+import CartDrawer from '../Cart/CartDrawer';
 
 const MENU_ITEMS = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
@@ -34,6 +38,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const theme = useTheme();
     const { user, logout } = useAuth();
+    const { itemsCount, toggleCart } = useCart();
     const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
     // Hide AppShell on login and register pages
@@ -133,7 +138,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                         })}
                     </Stack>
 
-                    <Box sx={{ flexGrow: 0, ml: 2 }}>
+                    <Box sx={{ flexGrow: 0, ml: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <IconButton onClick={() => toggleCart(true)} sx={{ color: 'text.secondary' }}>
+                            <Badge badgeContent={itemsCount} color="secondary">
+                                <ShoppingCartIcon />
+                            </Badge>
+                        </IconButton>
                         {user ? (
                             <>
                                 <Tooltip title="Open settings">
@@ -230,6 +240,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     </Box>
                 </Box>
             </Box>
-        </Box>
+            <CartDrawer />
+        </Box >
     );
 }

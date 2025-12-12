@@ -217,7 +217,7 @@ export default function DashboardPage() {
                                                 <Typography variant="body2" color="text.secondary">
                                                     {item.type === 'reservation'
                                                         ? `Party of ${item.data.partySize} • ${item.data.status}`
-                                                        : `Total: $${item.data.totalAmount.toFixed(2)} • ${item.data.status}`
+                                                        : `Total: $${(item.data.totalPrice || 0).toFixed(2)} • ${item.data.status}`
                                                     }
                                                 </Typography>
                                             </Paper>
