@@ -29,6 +29,27 @@ export const reservationService = {
         }
     },
 
+    async getUserReservations() {
+        try {
+            const response = await fetch(`${API_URL}/my-reservations`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to fetch user reservations');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    },
+
     async createReservation(data: any) {
         try {
             const response = await fetch(`${API_URL}/`, {

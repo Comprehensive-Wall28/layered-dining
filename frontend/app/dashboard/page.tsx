@@ -13,12 +13,26 @@ import {
     Divider,
     Button
 } from '@mui/material';
+import {
+    Timeline,
+    TimelineItem,
+    TimelineSeparator,
+    TimelineConnector,
+    TimelineContent,
+    TimelineDot,
+    TimelineOppositeContent
+} from '@mui/lab';
+import EventSeatIcon from '@mui/icons-material/EventSeat';
+import RestaurantIcon from '@mui/icons-material/Restaurant';
 import { authService } from '../../services/authService';
+import { reservationService } from '../../services/reservationService';
+import { orderService } from '../../services/orderService';
 
 export default function DashboardPage() {
     const router = useRouter();
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [timelineItems, setTimelineItems] = useState<any[]>([]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -28,6 +42,7 @@ export default function DashboardPage() {
                     router.replace('/login');
                 } else {
                     setUser(userData);
+                    fetchTimelineData(userData.id);
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -39,6 +54,32 @@ export default function DashboardPage() {
 
         checkAuth();
     }, [router]);
+
+    const fetchTimelineData = async (userId: string) => {
+        try {
+            const [reservationsData, ordersData] = await Promise.all([
+                reservationService.getUserReservations(),
+                orderService.getOrdersByCustomerId(userId)
+            ]);
+
+            const reservations = reservationsData.reservations.map((r: any) => ({
+                type: 'reservation',
+                date: new Date(`${r.reservationDate.split('T')[0]}T${r.startTime}`),
+                data: r
+            }));
+
+            const orders = ordersData.data.map((o: any) => ({
+                type: 'order',
+                date: new Date(o.createdAt),
+                data: o
+            }));
+
+            const combined = [...reservations, ...orders].sort((a, b) => b.date.getTime() - a.date.getTime());
+            setTimelineItems(combined);
+        } catch (error) {
+            console.error('Failed to fetch timeline data:', error);
+        }
+    };
 
     const handleLogout = async () => {
         await authService.logout();
@@ -63,16 +104,17 @@ export default function DashboardPage() {
                 My Dashboard
             </Typography>
 
-            <Paper
-                elevation={0}
-                sx={{
-                    p: 4,
-                    border: '1px solid #e0e0e0',
-                    borderRadius: 3,
-                }}
-            >
-                <Grid container spacing={4} alignItems="center">
-                    <Grid size={{ xs: 12, sm: 4 }} sx={{ textAlign: 'center' }}>
+            <Grid container spacing={4}>
+                <Grid size={{ xs: 12 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 4,
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 3,
+                            textAlign: 'center'
+                        }}
+                    >
                         <Avatar
                             sx={{
                                 width: 120,
@@ -91,10 +133,10 @@ export default function DashboardPage() {
                         <Typography variant="body2" color="text.secondary">
                             {user.role}
                         </Typography>
-                    </Grid>
 
-                    <Grid size={{ xs: 12, sm: 8 }}>
-                        <Box sx={{ mb: 3 }}>
+                        <Divider sx={{ my: 3 }} />
+
+                        <Box sx={{ mb: 3, textAlign: 'left' }}>
                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                 Email Address
                             </Typography>
@@ -103,9 +145,7 @@ export default function DashboardPage() {
                             </Typography>
                         </Box>
 
-                        <Divider sx={{ my: 3 }} />
-
-                        <Box sx={{ mb: 3 }}>
+                        <Box sx={{ mb: 3, textAlign: 'left' }}>
                             <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                                 Account Status
                             </Typography>
@@ -118,13 +158,64 @@ export default function DashboardPage() {
                             variant="outlined"
                             color="error"
                             onClick={handleLogout}
-                            sx={{ mt: 2 }}
+                            sx={{ mt: 2, width: '100%' }}
                         >
                             Sign Out
                         </Button>
-                    </Grid>
+                    </Paper>
                 </Grid>
-            </Paper>
+
+                <Grid size={{ xs: 12 }}>
+                    <Paper
+                        elevation={0}
+                        sx={{
+                            p: 4,
+                            border: '1px solid #e0e0e0',
+                            borderRadius: 3,
+                            minHeight: '400px'
+                        }}
+                    >
+                        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600, mb: 3 }}>
+                            Recent Activity
+                        </Typography>
+
+                        <Timeline position="alternate">
+                            {timelineItems.length > 0 ? (
+                                timelineItems.map((item, index) => (
+                                    <TimelineItem key={index}>
+                                        <TimelineOppositeContent color="text.secondary">
+                                            {item.date.toLocaleDateString()} {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </TimelineOppositeContent>
+                                        <TimelineSeparator>
+                                            <TimelineDot color={item.type === 'reservation' ? 'primary' : 'success'}>
+                                                {item.type === 'reservation' ? <EventSeatIcon /> : <RestaurantIcon />}
+                                            </TimelineDot>
+                                            {index < timelineItems.length - 1 && <TimelineConnector />}
+                                        </TimelineSeparator>
+                                        <TimelineContent>
+                                            <Typography variant="h6" component="span">
+                                                {item.type === 'reservation' ? 'Table Reservation' : 'Order Placed'}
+                                            </Typography>
+                                            <Typography>
+                                                {item.type === 'reservation'
+                                                    ? `Party of ${item.data.partySize} • ${item.data.status}`
+                                                    : `Total: $${item.data.totalAmount} • ${item.data.status}`
+                                                }
+                                            </Typography>
+                                        </TimelineContent>
+                                    </TimelineItem>
+                                ))
+                            ) : (
+                                <Box sx={{ textAlign: 'center', py: 5 }}>
+                                    <Typography color="text.secondary">
+                                        No recent activity found.
+                                    </Typography>
+                                </Box>
+                            )}
+                        </Timeline>
+                    </Paper>
+                </Grid>
+            </Grid>
         </Container>
     );
 }
