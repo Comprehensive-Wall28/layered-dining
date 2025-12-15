@@ -19,7 +19,7 @@ const authService = {
 
         if (!user) {
             const error = new Error('Invalid credentials');
-            error.code = 401; 
+            error.code = 401;
             throw error;
         }
 
@@ -58,14 +58,14 @@ const authService = {
         return token;
     },
 
-       /**
-     * Register users
-     * @param {string} email - The user's email address.
-     * @param {string} password - The user's password.
-     * @param {string} role - The user's role
-     * @returns {string} User details.
-     * @throws {Error} If login fails due to bad credentials.
-     */
+    /**
+  * Register users
+  * @param {string} email - The user's email address.
+  * @param {string} password - The user's password.
+  * @param {string} role - The user's role
+  * @returns {string} User details.
+  * @throws {Error} If login fails due to bad credentials.
+  */
     async registerUser(email, password, name, role) {
 
         const existingUser = await UserModel.findOne({ email });
@@ -75,11 +75,11 @@ const authService = {
             error.code = 409;
             throw error;
         }
-        
+
         // Hash the password
         const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);
-        
+
         // Create a new User document
         const newUser = new UserModel({
             name,
@@ -87,7 +87,7 @@ const authService = {
             password: hashedPassword,
             role: role || 'Customer'
         });
-        
+
         // Save the new user to the database
         await newUser.save();
 
@@ -100,12 +100,34 @@ const authService = {
         });
         await log.save();
 
-        return { 
-            id: newUser._id, 
-            name: newUser.name, 
+        return {
+            id: newUser._id,
+            name: newUser.name,
             email: newUser.email,
             cart: newUser.cart
         };
+    },
+
+    async deleteAccount(userId) {
+        const user = await UserModel.findById(userId);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+
+        await UserModel.findByIdAndDelete(userId);
+
+        const log = new LogModel({
+            action: 'DELETE',
+            description: 'User account deleted successfully',
+            severity: 'IMPORTANT',
+            type: 'SUCCESS',
+            userId: userId, // Log against the deleted user ID even if it's gone from Users collection for audit
+        });
+        await log.save();
+
+        return { message: 'Account deleted successfully' };
     },
 };
 

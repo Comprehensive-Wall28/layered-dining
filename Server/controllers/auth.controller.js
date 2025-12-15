@@ -10,14 +10,14 @@ const authController = {
             const token = await authService.login(email, password);
 
             res.cookie('jwt', token, {
-                httpOnly: true, 
+                httpOnly: true,
                 secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
                 sameSite: 'strict',
                 maxAge: 24 * 60 * 60 * 1000 // 1 day
             });
 
-            res.status(200).json({ 
-                status: 'success', 
+            res.status(200).json({
+                status: 'success',
                 message: 'Logged in successfully'
             });
 
@@ -27,9 +27,9 @@ const authController = {
                 status: 'error',
                 message: error.message
             });
-        }  
+        }
     },
-    
+
     register: async (req, res) => {
         // 1. Extract from the request
         const { email, password, name, role } = req.body;
@@ -45,16 +45,16 @@ const authController = {
             await userService.setCartId(newUser.id, userCart._id);
             const cartId = await userService.getCartId(newUser.id);
 
-            res.status(201).json({ 
+            res.status(201).json({
                 message: 'User registered successfully',
                 user: { ...newUser, cart: cartId }
             });
 
         } catch (error) {
             const statusCode = error.code || 500;
-            res.status(statusCode).json({ 
-                error: true, 
-                message: error.message 
+            res.status(statusCode).json({
+                error: true,
+                message: error.message
             });
         }
     },
@@ -62,11 +62,34 @@ const authController = {
     logout: async (req, res) => {
         // Clear the 'jwt' token cookie. 
         res.clearCookie('jwt', {
-            httpOnly: true, 
-            secure: process.env.NODE_ENV === 'production', 
-            sameSite: 'strict' 
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
         });
         res.status(200).json({ message: 'Logged out successfully' });
+    },
+
+    deleteAccount: async (req, res) => {
+        try {
+            // Assumes middleware has added user to req
+            const userId = req.user.id;
+            await authService.deleteAccount(userId);
+
+            // Clear cookie as well
+            res.clearCookie('jwt', {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'strict'
+            });
+
+            res.status(200).json({ message: 'Account deleted successfully' });
+        } catch (error) {
+            const statusCode = error.code || 500;
+            res.status(statusCode).json({
+                status: 'error',
+                message: error.message
+            });
+        }
     }
 }
 module.exports = authController;

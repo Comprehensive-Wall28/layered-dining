@@ -106,6 +106,18 @@ export default function DashboardPage() {
         router.replace('/login');
     };
 
+    const handleDeleteAccount = async () => {
+        if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+            try {
+                await authService.deleteAccount();
+                router.replace('/login');
+            } catch (error) {
+                console.error('Failed to delete account', error);
+                setSnackbar({ open: true, message: 'Failed to delete account', severity: 'error' });
+            }
+        }
+    };
+
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -214,6 +226,15 @@ export default function DashboardPage() {
                             sx={{ width: '100%' }}
                         >
                             Sign Out
+                        </Button>
+
+                        <Button
+                            variant="text"
+                            color="error"
+                            onClick={handleDeleteAccount}
+                            sx={{ width: '100%', mt: 1, fontSize: '0.8rem' }}
+                        >
+                            Delete Account
                         </Button>
                     </Paper>
                 </Grid>

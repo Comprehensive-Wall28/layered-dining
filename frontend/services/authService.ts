@@ -59,6 +59,24 @@ export const authService = {
         }
     },
 
+    async deleteAccount() {
+        try {
+            const response = await fetch(`${API_URL}/delete-account`, {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to delete account');
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Delete Account failed", error);
+            throw error;
+        }
+    },
+
     async getCurrentUser() {
         try {
             const response = await fetch(`${API_URL_USER}/`, {
