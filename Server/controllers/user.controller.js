@@ -199,6 +199,23 @@ const userController = {
         }
     },
 
+    getAllUsers: async (req, res) => {
+        try {
+            const { page, limit, search } = req.query;
+            const result = await userService.getAllUsers({ page, limit, search });
+
+            res.status(200).json({
+                status: 'success',
+                ...result
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
     deleteFeedback: async (req, res) => {
         try {
             const { id } = req.params;
@@ -227,6 +244,46 @@ const userController = {
                     message: error.message
                 });
             }
+        }
+    },
+    adminUpdateUser: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const { name, email, password, role } = req.body;
+
+            // Use service to update. Note: userService.updateUserProfile currently only supports name, email, password.
+            // If we want to support role update, we might need to update the service or use the model directly here/add service method.
+            // Let's check userService again. It takes (id, name, email, password). 
+            // I should probably update userService first to accept role or create a new service method `adminUpdateUserProfile`.
+            // For now, let's assume I'll update userService too.
+            // Actually, I'll stick to updating the controller to use a new service method I'll create.
+            const result = await userService.adminUpdateUser(id, { name, email, role });
+
+            res.status(200).json({
+                status: 'success',
+                message: 'User updated successfully',
+                user: result
+            });
+        } catch (error) {
+            res.status(error.code || 500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    getDashboardStats: async (req, res) => {
+        try {
+            const stats = await userService.getDashboardStats();
+            res.status(200).json({
+                status: 'success',
+                stats
+            });
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
         }
     }
 }

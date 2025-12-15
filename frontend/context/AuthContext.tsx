@@ -14,7 +14,7 @@ interface User {
 interface AuthContextType {
     user: User | null;
     loading: boolean;
-    login: (data: any) => Promise<void>;
+    login: (data: any) => Promise<any>;
     register: (data: any) => Promise<void>;
     logout: () => Promise<void>;
     checkAuth: () => Promise<void>;
@@ -46,7 +46,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = async (data: any) => {
         const result = await authService.login(data);
         // After login, fetch user details to populate state
-        await checkAuth();
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+        setLoading(false);
+        return userData;
     };
 
     const register = async (data: any) => {

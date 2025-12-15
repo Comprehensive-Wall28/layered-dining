@@ -1,6 +1,8 @@
 const UserModel = require('../models/user');
 const LogModel = require('../models/log');
 const FeedbackModel = require('../models/feedback');
+const OrderModel = require('../models/order');
+const ReservationModel = require('../models/reservation');
 
 const customerService = {
 
@@ -255,6 +257,120 @@ const customerService = {
         }
 
         return deletedFeedback;
+    },
+
+    /**
+     * Get all users with pagination and search
+     * @param {Object} query - Query parameters (page, limit, search)
+     * @returns {Object} Paginated users
+     */
+    async getAllUsers({ page = 1, limit = 10, search = '' }) {
+        const query = {};
+
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { email: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const skip = (page - 1) * limit;
+
+        const [users, total] = await Promise.all([
+            UserModel.find(query)
+                .select('-password') // Exclude password
+                .skip(skip)
+                .limit(parseInt(limit))
+                .sort({ createdAt: -1 }),
+            UserModel.countDocuments(query)
+        ]);
+
+        return {
+            users,
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / limit)
+        };
+    },
+
+    /**
+     * Admin update user (includes role)
+     */
+    async adminUpdateUser(id, { name, email, role }) {
+        const user = await UserModel.findById(id);
+        if (!user) {
+            const error = new Error('User not found');
+            error.code = 404;
+            throw error;
+        }
+
+        if (name) user.name = name;
+        if (email) user.email = email;
+        if (role) user.role = role;
+
+        await user.save();
+
+        const log = new LogModel({
+            action: 'UPDATE',
+            description: `Admin updated user ${id}`,
+            severity: 'NOTICE',
+            type: 'SUCCESS',
+            userId: user._id,
+        });
+        await log.save();
+
+        return user;
+    },
+
+    /**
+     * Get dashboard stats (Orders and Reservations per day)
+     */
+    async getDashboardStats() {
+        // Aggregate Orders by day
+        const orderStats = await OrderModel.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                    orders: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Aggregate Reservations by day
+        const reservationStats = await ReservationModel.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$reservationDate" } },
+                    reservations: { $sum: 1 }
+                }
+            }
+        ]);
+
+        // Merge results
+        const statsMap = {};
+
+        orderStats.forEach(stat => {
+            const date = stat._id;
+            if (!statsMap[date]) statsMap[date] = { date, orders: 0, reservations: 0 };
+            statsMap[date].orders = stat.orders;
+        });
+
+        reservationStats.forEach(stat => {
+            const date = stat._id;
+            if (!statsMap[date]) statsMap[date] = { date, orders: 0, reservations: 0 };
+            statsMap[date].reservations = stat.reservations;
+        });
+
+        // Convert to array and sort by date
+        const sevenDaysAgo = new Date();
+        sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+        const result = Object.values(statsMap)
+            .sort((a, b) => new Date(a.date) - new Date(b.date))
+        // Optional: Filter for last 30 days or similar if needed, but for now return all
+        // .filter(item => new Date(item.date) >= sevenDaysAgo);
+
+        return result;
     }
 
 

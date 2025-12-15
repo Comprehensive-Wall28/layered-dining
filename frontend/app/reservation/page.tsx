@@ -92,7 +92,7 @@ export default function ReservationPage() {
             </Typography>
 
             {/* Search Form */}
-            <Paper elevation={0} sx={{ p: 4, mb: 6, border: '1px solid #e0e0e0', borderRadius: 3 }}>
+            <Paper elevation={0} sx={{ p: 4, mb: 6, border: '1px solid rgba(0, 0, 0, 0.05)', borderRadius: 3 }}>
                 <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
                     Find Availability
                 </Typography>
@@ -187,7 +187,7 @@ export default function ReservationPage() {
                         <Grid container spacing={3}>
                             {tables.map((table) => (
                                 <Grid size={{ xs: 12, sm: 6, md: 4 }} key={table._id}>
-                                    <Card elevation={0} sx={{ border: '1px solid #e0e0e0', borderRadius: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <Card elevation={0} sx={{ border: '1px solid rgba(0, 0, 0, 0.05)', borderRadius: 3, height: '100%', display: 'flex', flexDirection: 'column' }}>
                                         <CardContent sx={{ flexGrow: 1 }}>
                                             <Typography variant="h6" gutterBottom>
                                                 Table {table.tableNumber}

@@ -13,10 +13,11 @@ import {
 } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { authService } from '../../services/authService';
+import { useAuth } from '../../context/AuthContext';
 
 export default function LoginPage() {
     const router = useRouter();
+    const { login } = useAuth();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -28,8 +29,16 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            await authService.login({ email, password });
-            router.push('/dashboard'); // Redirect to dashboard
+            const userData = await login({ email, password });
+
+            // Role-based redirection
+            if (userData?.role === 'Admin') {
+                router.push('/admin');
+            } else if (userData?.role === 'Manager') {
+                router.push('/manager');
+            } else {
+                router.push('/dashboard');
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to login');
         } finally {
@@ -47,7 +56,7 @@ export default function LoginPage() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     width: '100%',
-                    border: '1px solid #e0e0e0',
+                    border: '1px solid rgba(0, 0, 0, 0.05)',
                     borderRadius: 3, // Uses theme shape or default multiplication, ensuring rounded look
                 }}
             >

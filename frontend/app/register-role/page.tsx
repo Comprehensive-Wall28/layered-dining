@@ -9,18 +9,24 @@ import {
     Typography,
     Paper,
     Alert,
-    Link as MuiLink
+    Link as MuiLink,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    SelectChangeEvent
 } from '@mui/material';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authService } from '../../services/authService';
 
-export default function RegisterPage() {
+export default function RegisterRolePage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'Manager' // Default to Manager, user can switch to Admin
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -29,6 +35,13 @@ export default function RegisterPage() {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
+        });
+    };
+
+    const handleRoleChange = (e: SelectChangeEvent) => {
+        setFormData({
+            ...formData,
+            role: e.target.value as string
         });
     };
 
@@ -62,7 +75,7 @@ export default function RegisterPage() {
                 }}
             >
                 <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 600 }}>
-                    Create Account
+                    Create Staff Account
                 </Typography>
 
                 {error && (
@@ -72,14 +85,6 @@ export default function RegisterPage() {
                 )}
 
                 <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1, width: '100%' }}>
-                    {/* Note: Backend route might expect 'username' or just 'name'. 
-                I'll assume 'username' based on common patterns or just pass everything 
-                the user types as 'username' if that's what backend expects.
-                Wait, I should check the backend controller to be sure about variable names. 
-                I'll assume 'username', 'email', 'password' are standard.
-                Let me quickly check the 'Server/controllers/auth.controller.js' if I can.
-                Actually, I'll stick with a generic Name field mapping to username for now.
-            */}
                     <TextField
                         margin="normal"
                         required
@@ -130,6 +135,22 @@ export default function RegisterPage() {
                             }
                         }}
                     />
+
+                    <FormControl fullWidth margin="normal">
+                        <InputLabel id="role-select-label">Role</InputLabel>
+                        <Select
+                            labelId="role-select-label"
+                            id="role-select"
+                            value={formData.role}
+                            label="Role"
+                            onChange={handleRoleChange}
+                            sx={{ borderRadius: 2 }}
+                        >
+                            <MenuItem value="Manager">Manager</MenuItem>
+                            <MenuItem value="Admin">Admin</MenuItem>
+                        </Select>
+                    </FormControl>
+
                     <Button
                         type="submit"
                         fullWidth
@@ -137,7 +158,7 @@ export default function RegisterPage() {
                         disabled={loading}
                         sx={{ mt: 3, mb: 2, py: 1.5, fontSize: '1.1rem' }}
                     >
-                        {loading ? 'Registering...' : 'Sign Up'}
+                        {loading ? 'Registering...' : 'Create Account'}
                     </Button>
 
                     <Box sx={{ textAlign: 'center' }}>

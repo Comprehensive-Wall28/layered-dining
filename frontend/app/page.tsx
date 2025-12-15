@@ -42,70 +42,6 @@ export default function Home() {
 
   return (
     <Box sx={{ flexGrow: 1, minHeight: '100vh', flexDirection: 'column', display: 'flex' }}>
-      {/* Navigation */}
-      <AppBar position="fixed" color="default" sx={{ bgcolor: 'white' }}>
-        <Container maxWidth="lg">
-          <Toolbar disableGutters>
-            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.main', letterSpacing: 1 }}>
-              LAYERED DINING
-            </Typography>
-            <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
-              <Button color="inherit" component="a" href="/">Home</Button>
-              <Button color="inherit">Menu</Button>
-              <Button color="inherit">Details</Button>
-
-              {!user ? (
-                <>
-                  <Button color="inherit" component={Link} href="/login">Login</Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    component={Link}
-                    href="/register"
-                    sx={{ borderRadius: '20px', px: 3 }}
-                  >
-                    Register
-                  </Button>
-                </>
-              ) : (
-                <Box sx={{ flexGrow: 0, ml: 2 }}>
-                  <Tooltip title="Open settings">
-                    <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                      <Avatar sx={{ bgcolor: 'secondary.main' }}>
-                        {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
-                      </Avatar>
-                    </IconButton>
-                  </Tooltip>
-                  <Menu
-                    sx={{ mt: '45px' }}
-                    id="menu-appbar"
-                    anchorEl={anchorElUser}
-                    anchorOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    keepMounted
-                    transformOrigin={{
-                      vertical: 'top',
-                      horizontal: 'right',
-                    }}
-                    open={Boolean(anchorElUser)}
-                    onClose={handleCloseUserMenu}
-                  >
-                    <MenuItem component={Link} href="/dashboard" onClick={handleCloseUserMenu}>
-                      <Typography textAlign="center">Dashboard</Typography>
-                    </MenuItem>
-                    <MenuItem onClick={() => { handleCloseUserMenu(); logout(); }}>
-                      <Typography textAlign="center">Logout</Typography>
-                    </MenuItem>
-                  </Menu>
-                </Box>
-              )}
-            </Box>
-          </Toolbar>
-        </Container>
-      </AppBar>
-      <Toolbar /> {/* Spacer for fixed AppBar */}
 
       {/* Hero Section */}
       <Box sx={{
@@ -135,7 +71,14 @@ export default function Home() {
             >
               Reserve a Table
             </Button>
-            <Button variant="outlined" sx={{ color: 'primary.main', borderColor: 'primary.main', '&:hover': { borderColor: 'primary.dark', bgcolor: 'rgba(0,0,0,0.05)' } }} size="large" startIcon={<DeliveryDiningIcon />}>
+            <Button
+              variant="outlined"
+              sx={{ color: 'primary.main', borderColor: 'primary.main', '&:hover': { borderColor: 'primary.dark', bgcolor: 'rgba(0,0,0,0.05)' } }}
+              size="large"
+              startIcon={<DeliveryDiningIcon />}
+              component={Link}
+              href="/menu"
+            >
               Order Online
             </Button>
           </Stack>

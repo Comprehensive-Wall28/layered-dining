@@ -18,22 +18,32 @@ const orderService = {
         }
 
         // Calculate total price from current menu item prices
-        const menuIds = items.map(i => i.menuItemId);
+        // Calculate total price from current menu item prices
+        const menuIds = items.map(i => i.menuItemId._id || i.menuItemId);
         const menuDocs = await MenuItem.find({ _id: { $in: menuIds } });
         const priceMap = {};
         for (const m of menuDocs) priceMap[m._id.toString()] = m.price || 0;
 
+        const orderItems = [];
         let totalPrice = 0;
         for (const it of items) {
-            const id = it.menuItemId.toString ? it.menuItemId.toString() : String(it.menuItemId);
+            const rawId = it.menuItemId._id || it.menuItemId;
+            const id = rawId.toString ? rawId.toString() : String(rawId);
             const qty = Number(it.quantity) || 1;
             const price = priceMap[id] ?? 0;
             totalPrice += price * qty;
+
+            orderItems.push({
+                menuItemId: id,
+                quantity: qty,
+                price: price
+            });
         }
 
         const order = new Order({
             customerId,
             customerName,
+            items: orderItems,
             orderType: orderType || 'Dine-In',
             status: 'Pending',
             totalPrice,
@@ -57,7 +67,7 @@ const orderService = {
         return order;
     },
     async getOrderById(id) {
-        const order = await Order.findById(id);
+        const order = await Order.findById(id).populate('items.menuItemId');
         if (!order) {
             const error = new Error('Order not found');
             error.code = 404;
@@ -77,11 +87,11 @@ const orderService = {
     },
 
     async getOrdersByCustomerId(customerId) {
-        return await Order.find({ customerId });
+        return await Order.find({ customerId }).populate('items.menuItemId');
     },
 
     async getAllOrders() {
-        return await Order.find({});
+        return await Order.find({}).populate('items.menuItemId');
     },
 
     async updateOrderStatus(id, status, paymentStatus) {

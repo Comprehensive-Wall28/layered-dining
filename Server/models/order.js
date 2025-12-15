@@ -8,20 +8,30 @@ const orderSchema = new mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    items: {
+        type: [
+            {
+                menuItemId: { type: mongoose.Schema.Types.ObjectId, ref: 'MenuItem', required: true },
+                quantity: { type: Number, required: true, min: 1 },
+                price: { type: Number, required: true } // Price at purchase
+            }
+        ],
+        required: true
+    },
 
     customerName: {
         type: String,
         required: true,
     },
     orderType: {
-        type : String,
-         enum: ['Dine-In', 'Takeaway', 'Delivery'],
+        type: String,
+        enum: ['Dine-In', 'Takeaway', 'Delivery'],
         required: true,
         default: 'Dine-In'
     },
     status: {
         type: String,
-        enum: ['Accepted','Pending','In Progress', 'Completed', 'Cancelled'],
+        enum: ['Accepted', 'Pending', 'In Progress', 'Completed', 'Cancelled', 'Confirmed'],
         required: true,
         default: 'In Progress'
     },

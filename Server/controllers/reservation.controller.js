@@ -52,80 +52,80 @@ const reservationController = {
     /**
      * Create a new reservation
      */
-   createReservation: async (req, res) => {
-    try {
-        const reservationData = req.body;
-        const authenticatedUser = req.user;
+    createReservation: async (req, res) => {
+        try {
+            const reservationData = req.body;
+            const authenticatedUser = req.user;
 
-        // Validate required fields (customer fields are now optional as they can be auto-populated)
-        const requiredFields = ['tableId', 'partySize', 'reservationDate', 'startTime', 'endTime'];
-        const missingFields = requiredFields.filter(field => !reservationData[field]);
+            // Validate required fields (customer fields are now optional as they can be auto-populated)
+            const requiredFields = ['tableId', 'partySize', 'reservationDate', 'startTime', 'endTime'];
+            const missingFields = requiredFields.filter(field => !reservationData[field]);
 
-        if (missingFields.length > 0) {
-            return res.status(400).json({
-                status: 'error',
-                message: `Missing required fields: ${missingFields.join(', ')}`
-            });
-        }
-
-        // Fetch the authenticated user's full details from database
-        const userDetails = await User.findById(authenticatedUser.id);
-        if (!userDetails) {
-            return res.status(401).json({
-                status: 'error',
-                message: 'User not found'
-            });
-        }
-
-        // Determine the target customer for this reservation
-        let targetCustomerId = authenticatedUser.id;
-        let customerName = userDetails.name;
-        let customerEmail = userDetails.email;
-
-        // If admin/manager is creating a reservation for another customer
-        if (reservationData.customerId && ['Admin', 'Manager'].includes(authenticatedUser.role)) {
-            // Validate the target customer exists
-            const targetCustomer = await User.findById(reservationData.customerId);
-            if (!targetCustomer) {
-                return res.status(404).json({
+            if (missingFields.length > 0) {
+                return res.status(400).json({
                     status: 'error',
-                    message: 'Target customer not found'
+                    message: `Missing required fields: ${missingFields.join(', ')}`
                 });
             }
-            targetCustomerId = targetCustomer._id;
-            customerName = targetCustomer.name;
-            customerEmail = targetCustomer.email;
-        }
 
-        // Override customer details with the determined values
-        reservationData.customerName = customerName;
-        reservationData.customerEmail = customerEmail;
+            // Fetch the authenticated user's full details from database
+            const userDetails = await User.findById(authenticatedUser.id);
+            if (!userDetails) {
+                return res.status(401).json({
+                    status: 'error',
+                    message: 'User not found'
+                });
+            }
 
-        const newReservation = await reservationService.createReservation(
-            reservationData, 
-            authenticatedUser,
-            targetCustomerId
-        );
+            // Determine the target customer for this reservation
+            let targetCustomerId = authenticatedUser.id;
+            let customerName = userDetails.name;
+            let customerEmail = userDetails.email;
 
-        res.status(201).json({
-            status: 'success',
-            message: 'Reservation created successfully',
-            reservation: newReservation
-        });
+            // If admin/manager is creating a reservation for another customer
+            if (reservationData.customerId && ['Admin', 'Manager'].includes(authenticatedUser.role)) {
+                // Validate the target customer exists
+                const targetCustomer = await User.findById(reservationData.customerId);
+                if (!targetCustomer) {
+                    return res.status(404).json({
+                        status: 'error',
+                        message: 'Target customer not found'
+                    });
+                }
+                targetCustomerId = targetCustomer._id;
+                customerName = targetCustomer.name;
+                customerEmail = targetCustomer.email;
+            }
 
-    } catch (error) {
-        const statusCode = error.code || 500;
-        if (!res.headersSent) {
-            res.status(statusCode).json({
-                status: 'error',
-                message: error.message
+            // Override customer details with the determined values
+            reservationData.customerName = customerName;
+            reservationData.customerEmail = customerEmail;
+
+            const newReservation = await reservationService.createReservation(
+                reservationData,
+                authenticatedUser,
+                targetCustomerId
+            );
+
+            res.status(201).json({
+                status: 'success',
+                message: 'Reservation created successfully',
+                reservation: newReservation
             });
-        } else {
-            console.error('Error occurred after response was sent:', error);
+
+        } catch (error) {
+            const statusCode = error.code || 500;
+            if (!res.headersSent) {
+                res.status(statusCode).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                console.error('Error occurred after response was sent:', error);
+            }
         }
-    }
-    
-},
+
+    },
 
 
     /**
@@ -141,6 +141,36 @@ const reservationController = {
                 status: 'success',
                 count: reservations.length,
                 reservations
+            });
+
+        } catch (error) {
+            const statusCode = error.code || 500;
+            res.status(statusCode).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    /**
+     * Get reservation by ID
+     */
+    getReservationById: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const reservation = await reservationService.getReservationById(id);
+
+            // Access control: User can only see their own reservations, Admin/Manager can see all
+            if (reservation.userId._id.toString() !== req.user.id && !['Admin', 'Manager'].includes(req.user.role)) {
+                return res.status(403).json({
+                    status: 'error',
+                    message: 'Unauthorized to view this reservation'
+                });
+            }
+
+            res.status(200).json({
+                status: 'success',
+                reservation
             });
 
         } catch (error) {
@@ -210,6 +240,30 @@ const reservationController = {
                 reservation: updatedReservation
             });
 
+        } catch (error) {
+            const statusCode = error.code || 500;
+            res.status(statusCode).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    /**
+     * Update reservation details
+     */
+    updateReservation: async (req, res) => {
+        try {
+            const { id } = req.params;
+            const updateData = req.body;
+
+            const updatedReservation = await reservationService.updateReservation(id, updateData, req.user);
+
+            res.status(200).json({
+                status: 'success',
+                message: 'Reservation updated successfully',
+                reservation: updatedReservation
+            });
         } catch (error) {
             const statusCode = error.code || 500;
             res.status(statusCode).json({
