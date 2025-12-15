@@ -18,6 +18,7 @@ import {
 import { authService } from '../../services/authService';
 import ReservationManagement from '../../components/Admin/ReservationManagement';
 import OrderManagement from '../../components/Admin/OrderManagement';
+import TableManagement from '../../components/Table/TableManagement';
 
 export default function ManagerDashboardPage() {
     const router = useRouter();
@@ -183,6 +184,18 @@ export default function ManagerDashboardPage() {
                                     }}
                                 >
                                     <OrderManagement />
+                                </Paper>
+                            </Grid>
+                            <Grid size={{ xs: 12 }}>
+                                <Paper
+                                    elevation={0}
+                                    sx={{
+                                        p: 4,
+                                        border: '1px solid rgba(0, 0, 0, 0.05)',
+                                        borderRadius: 3,
+                                    }}
+                                >
+                                    <TableManagement />
                                 </Paper>
                             </Grid>
                         </Grid>

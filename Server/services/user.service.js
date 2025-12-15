@@ -230,9 +230,22 @@ const customerService = {
      * Get all feedback
      * @returns {Array} List of all feedback
      */
-    async getAllFeedback() {
-        const allFeedback = await FeedbackModel.find().populate('userId', 'name email');
-        return allFeedback;
+    async getAllFeedback({ page = 1, limit = 10 } = {}) {
+        const skip = (page - 1) * limit;
+        const [feedback, total] = await Promise.all([
+            FeedbackModel.find()
+                .populate('userId', 'name email')
+                .skip(skip)
+                .limit(parseInt(limit))
+                .sort({ createdAt: -1 }),
+            FeedbackModel.countDocuments()
+        ]);
+        return {
+            feedback,
+            total,
+            page: parseInt(page),
+            pages: Math.ceil(total / limit)
+        };
     },
 
     /**

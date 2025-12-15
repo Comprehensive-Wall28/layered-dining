@@ -184,11 +184,12 @@ const userController = {
 
     getAllFeedback: async (req, res) => {
         try {
-            const result = await userService.getAllFeedback();
+            const { page, limit } = req.query;
+            const result = await userService.getAllFeedback({ page, limit });
 
             res.status(200).json({
                 status: 'success',
-                result
+                ...result
             });
 
         } catch (error) {

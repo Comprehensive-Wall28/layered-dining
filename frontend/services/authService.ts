@@ -244,6 +244,21 @@ export const authService = {
         }
     },
 
+    async updateReservationStatus(id: string, status: string) {
+        const response = await fetch(`${API_URL_RESERVATION}/status/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status }),
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Update reservation status failed:', response.status, response.statusText, errorText);
+            throw new Error(`Failed to update reservation status: ${response.status} ${response.statusText}`);
+        }
+        return await response.json();
+    },
+
     async getAllOrders() {
         try {
             const response = await fetch(`${API_BASE_URL}/api/v1/orders`, {

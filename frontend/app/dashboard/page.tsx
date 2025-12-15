@@ -56,6 +56,10 @@ export default function DashboardPage() {
                 const userData = await authService.getCurrentUser();
                 if (!userData) {
                     router.replace('/login');
+                } else if (userData.role === 'Admin') {
+                    router.replace('/admin');
+                } else if (userData.role === 'Manager') {
+                    router.replace('/manager');
                 } else {
                     setUser(userData);
                     fetchTimelineData(userData.id);

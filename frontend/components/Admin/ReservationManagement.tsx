@@ -3,7 +3,8 @@ import {
     Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
     Paper, Button, Chip, Dialog, DialogTitle, DialogContent,
     DialogActions, TextField, CircularProgress, Box, Typography,
-    Stack, IconButton, Tooltip, TablePagination
+    Stack, IconButton, Tooltip, TablePagination,
+    FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { Edit as EditIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import { authService } from '../../services/authService';
@@ -12,7 +13,7 @@ export default function ReservationManagement() {
     const [reservations, setReservations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [editReservation, setEditReservation] = useState<any | null>(null);
-    const [editForm, setEditForm] = useState({ reservationDate: '', startTime: '', partySize: '' });
+    const [editForm, setEditForm] = useState({ reservationDate: '', startTime: '', partySize: '', status: '' });
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(5);
 
@@ -55,7 +56,8 @@ export default function ReservationManagement() {
         setEditForm({
             reservationDate: res.reservationDate.split('T')[0],
             startTime: res.startTime,
-            partySize: res.partySize
+            partySize: res.partySize,
+            status: res.status
         });
     };
 
@@ -67,6 +69,11 @@ export default function ReservationManagement() {
                 startTime: editForm.startTime,
                 partySize: parseInt(editForm.partySize)
             });
+
+            if (editForm.status && editForm.status !== editReservation.status) {
+                await authService.updateReservationStatus(editReservation._id, editForm.status);
+            }
+
             setEditReservation(null);
             fetchReservations();
         } catch (err) {
@@ -126,7 +133,12 @@ export default function ReservationManagement() {
                                 <TableCell>
                                     <Chip
                                         label={res.status}
-                                        color={res.status === 'Confirmed' ? 'success' : res.status === 'Cancelled' ? 'error' : 'default'}
+                                        color={
+                                            res.status === 'Confirmed' ? 'success' :
+                                                res.status === 'Completed' ? 'info' :
+                                                    res.status === 'Cancelled' || res.status === 'No-Show' ? 'error' :
+                                                        res.status === 'Pending' ? 'warning' : 'default'
+                                        }
                                         size="small"
                                     />
                                 </TableCell>
@@ -204,6 +216,20 @@ export default function ReservationManagement() {
                         onChange={(e) => setEditForm({ ...editForm, partySize: e.target.value })}
                         sx={{ mb: 2 }}
                     />
+                    <FormControl fullWidth sx={{ mb: 2 }}>
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                            value={editForm.status}
+                            label="Status"
+                            onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}
+                        >
+                            {['Pending', 'Confirmed', 'Cancelled', 'Completed', 'No-Show'].map((status) => (
+                                <MenuItem key={status} value={status}>
+                                    {status}
+                                </MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setEditReservation(null)}>Cancel</Button>

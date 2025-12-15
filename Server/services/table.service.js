@@ -132,6 +132,7 @@ const tableService = {
             }
 
             // Update allowed fields
+            if (updates.tableNumber) table.tableNumber = updates.tableNumber;
             if (updates.capacity) table.capacity = updates.capacity;
             if (updates.location) table.location = updates.location;
             if (updates.status) table.status = updates.status;

@@ -25,9 +25,9 @@ export const feedbackService = {
         }
     },
 
-    async getAllFeedback() {
+    async getAllFeedback(page = 1, limit = 5) {
         try {
-            const response = await fetch(API_URL, {
+            const response = await fetch(`${API_URL}?page=${page}&limit=${limit}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,8 +40,7 @@ export const feedbackService = {
                 throw new Error(errorData.message || 'Failed to fetch feedback');
             }
 
-            const data = await response.json();
-            return data.result;
+            return await response.json();
         } catch (error) {
             console.error("Get All Feedback failed", error);
             throw error;

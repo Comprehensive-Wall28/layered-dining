@@ -31,7 +31,7 @@ const reservationService = {
 
             // Convert date string to Date object for comparison
             const searchDate = new Date(reservationDate);
-            searchDate.setHours(0, 0, 0, 0);
+            searchDate.setUTCHours(0, 0, 0, 0);
 
             const nextDay = new Date(searchDate);
             nextDay.setDate(nextDay.getDate() + 1);
@@ -90,6 +90,8 @@ const reservationService = {
         const start2Minutes = s2h * 60 + s2m;
         const end2Minutes = e2h * 60 + e2m;
 
+        // Check if ranges overlap
+        // Two ranges overlap if (StartA < EndB) and (EndA > StartB)
         return start1Minutes < end2Minutes && end1Minutes > start2Minutes;
     },
 
@@ -332,7 +334,7 @@ Reservation Details:
             if (!isTableAvailable) {
                 // Find the conflicting reservation(s) for this table
                 const searchDate = new Date(reservationDate);
-                searchDate.setHours(0, 0, 0, 0);
+                searchDate.setUTCHours(0, 0, 0, 0);
                 const nextDay = new Date(searchDate);
                 nextDay.setDate(nextDay.getDate() + 1);
 
@@ -481,7 +483,7 @@ Reservation Details:
 
             if (filters.date) {
                 const searchDate = new Date(filters.date);
-                searchDate.setHours(0, 0, 0, 0);
+                searchDate.setUTCHours(0, 0, 0, 0);
                 const nextDay = new Date(searchDate);
                 nextDay.setDate(nextDay.getDate() + 1);
 

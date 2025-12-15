@@ -93,11 +93,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     {/* Navigation Items */}
                     <Stack direction="row" spacing={1} sx={{ flexGrow: 1, display: { xs: 'none', sm: 'flex' } }}>
                         {MENU_ITEMS.map((item) => {
-                            const isActive = pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path));
+                            let path = item.path;
+                            if (item.text === 'Dashboard' && user) {
+                                path = user.role === 'Admin' ? '/admin' : user.role === 'Manager' ? '/manager' : '/dashboard';
+                            }
+
+                            const isActive = pathname === path || (path !== '/' && pathname.startsWith(path));
                             return (
                                 <Button
                                     key={item.text}
-                                    onClick={() => handleNavigation(item.path)}
+                                    onClick={() => handleNavigation(path)}
                                     startIcon={item.icon}
                                     sx={{
                                         color: isActive ? 'primary.main' : 'text.secondary',
@@ -121,11 +126,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     {/* Mobile Nav Icons (Visible only on XS) */}
                     <Stack direction="row" spacing={0} sx={{ flexGrow: 1, display: { xs: 'flex', sm: 'none' } }}>
                         {MENU_ITEMS.map((item) => {
-                            const isActive = pathname === item.path || (item.path !== '/' && pathname.startsWith(item.path));
+                            let path = item.path;
+                            if (item.text === 'Dashboard' && user) {
+                                path = user.role === 'Admin' ? '/admin' : user.role === 'Manager' ? '/manager' : '/dashboard';
+                            }
+
+                            const isActive = pathname === path || (path !== '/' && pathname.startsWith(path));
                             return (
                                 <IconButton
                                     key={item.text}
-                                    onClick={() => handleNavigation(item.path)}
+                                    onClick={() => handleNavigation(path)}
                                     sx={{
                                         color: isActive ? 'primary.main' : 'text.secondary',
                                         bgcolor: isActive ? alpha(theme.palette.primary.main, 0.08) : 'transparent',
@@ -169,7 +179,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                                     open={Boolean(anchorElUser)}
                                     onClose={handleCloseUserMenu}
                                 >
-                                    <MenuItem onClick={() => { handleCloseUserMenu(); router.push('/dashboard'); }}>
+                                    <MenuItem onClick={() => {
+                                        handleCloseUserMenu();
+                                        const dashboardPath = user.role === 'Admin' ? '/admin' : user.role === 'Manager' ? '/manager' : '/dashboard';
+                                        router.push(dashboardPath);
+                                    }}>
                                         <Typography textAlign="center">Dashboard</Typography>
                                     </MenuItem>
                                     <MenuItem onClick={handleLogout}>

@@ -20,7 +20,11 @@ export const reservationService = {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to fetch available tables');
+                if (response.status === 404) {
+                    return { tables: [] };
+                }
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Failed to fetch available tables');
             }
 
             return await response.json();
