@@ -243,7 +243,11 @@ export default function DashboardPage() {
                                             </Typography>
                                         </TimelineOppositeContent>
                                         <TimelineSeparator>
-                                            <TimelineDot color={item.type === 'reservation' ? 'primary' : 'success'}>
+                                            <TimelineDot color={
+                                                item.type === 'reservation'
+                                                    ? 'primary'
+                                                    : (item.data.paymentStatus === 'Refunded' ? 'warning' : 'success')
+                                            }>
                                                 {item.type === 'reservation' ? <EventSeatIcon /> : <RestaurantIcon />}
                                             </TimelineDot>
                                             {index < timelineItems.length - 1 && <TimelineConnector />}
@@ -270,7 +274,7 @@ export default function DashboardPage() {
                                                 <Typography variant="body2" color="text.secondary">
                                                     {item.type === 'reservation'
                                                         ? `Party of ${item.data.partySize} • ${item.data.status}`
-                                                        : `Total: $${(item.data.totalPrice || 0).toFixed(2)} • ${item.data.status}`
+                                                        : `Total: $${(item.data.totalPrice || 0).toFixed(2)} • ${item.data.paymentStatus === 'Refunded' ? 'Refunded' : item.data.status}`
                                                     }
                                                 </Typography>
                                             </Paper>

@@ -114,10 +114,23 @@ export default function OrderTrackingPage() {
                     </Box>
                     <Chip
                         label={order.status}
-                        color={order.status === 'Completed' ? 'success' : order.status === 'Cancelled' ? 'error' : 'primary'}
+                        color={
+                            order.status === 'Completed' ? 'success' :
+                                order.status === 'Ready' ? 'success' :
+                                    order.status === 'Preparing' ? 'info' :
+                                        order.status === 'Confirmed' ? 'primary' :
+                                            order.status === 'Cancelled' ? 'error' :
+                                                'primary'
+                        }
                         sx={{ ml: 'auto', fontWeight: 'bold' }}
                     />
                 </Box>
+
+                {order.paymentStatus === 'Refunded' && (
+                    <Alert severity="warning" sx={{ mb: 3 }}>
+                        This order has been refunded.
+                    </Alert>
+                )}
 
                 <Divider sx={{ mb: 4 }} />
 
@@ -171,7 +184,12 @@ export default function OrderTrackingPage() {
                             Payment Status
                         </Typography>
                         <Typography variant="body1" component="div" sx={{ mb: 2 }}>
-                            <Chip label={order.paymentStatus} size="small" variant="outlined" />
+                            <Chip
+                                label={order.paymentStatus}
+                                size="small"
+                                variant="outlined"
+                                color={order.paymentStatus === 'Refunded' ? 'warning' : 'default'}
+                            />
                         </Typography>
 
                         <Typography variant="subtitle2" color="text.secondary">

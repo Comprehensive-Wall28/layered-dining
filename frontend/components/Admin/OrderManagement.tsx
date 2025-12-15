@@ -118,7 +118,14 @@ export default function OrderManagement() {
                                 <TableCell>
                                     <Chip
                                         label={order.status}
-                                        color={order.status === 'Completed' ? 'success' : order.status === 'Cancelled' ? 'error' : 'warning'}
+                                        color={
+                                            order.status === 'Completed' ? 'success' :
+                                                order.status === 'Ready' ? 'success' :
+                                                    order.status === 'Preparing' ? 'info' :
+                                                        order.status === 'Confirmed' ? 'primary' :
+                                                            order.status === 'Cancelled' ? 'error' :
+                                                                'warning'
+                                        }
                                         size="small"
                                     />
                                 </TableCell>
@@ -162,6 +169,8 @@ export default function OrderManagement() {
             >
                 <MenuItem onClick={() => handleStatusUpdate('Pending')}>Set Pending</MenuItem>
                 <MenuItem onClick={() => handleStatusUpdate('Confirmed')}>Set Confirmed</MenuItem>
+                <MenuItem onClick={() => handleStatusUpdate('Preparing')}>Set Preparing</MenuItem>
+                <MenuItem onClick={() => handleStatusUpdate('Ready')}>Set Ready</MenuItem>
                 <MenuItem onClick={() => handleStatusUpdate('Completed')}>Set Completed</MenuItem>
                 <MenuItem onClick={() => handleStatusUpdate('Cancelled')} sx={{ color: 'error.main' }}>Cancel Order</MenuItem>
                 {selectedOrder?.paymentStatus === 'Paid' && (
