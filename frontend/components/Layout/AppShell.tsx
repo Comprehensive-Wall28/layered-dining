@@ -40,6 +40,7 @@ const MENU_ITEMS = [
     { text: 'Home', icon: <HomeIcon />, path: '/' },
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Reserve Table', icon: <EventSeatIcon />, path: '/reservation' },
+    { text: 'My Reservations', icon: <EventSeatIcon />, path: '/my-reservations' },
 ];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {

@@ -117,4 +117,27 @@ export const reservationService = {
             throw error;
         }
     }
+,
+
+    async updateReservation(id: string, data: any) {
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to update reservation');
+            }
+
+            return await response.json();
+        } catch (error) {
+            throw error;
+        }
+    }
 };
