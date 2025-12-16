@@ -32,6 +32,7 @@ const tableRouter = require("./routes/table.routes.js")
 const orderRouter = require("./routes/order.routes.js")
 const cartRouter = require('./routes/cart.routes.js');
 const managerRouter = require('./routes/manager.routes.js')
+const inventoryRouter = require('./routes/inventory.routes.js')
 
 
 app.use(express.json());
@@ -52,6 +53,7 @@ app.use("/api/v1/menu", menuRouter);
 app.use("/api/v1/orders", orderRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/manager", managerRouter);
+app.use("/api/v1/inventory", inventoryRouter);
 // Primary Test Route "http://localhost:PORT/"
 app.get('/', (req, res) => {
   res.send('Welcome! Backend started successfully.')
