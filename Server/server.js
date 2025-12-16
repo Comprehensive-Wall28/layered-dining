@@ -39,7 +39,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser())
 
 app.use(cors({
-  origin: true, // Allow all origins in development (or specify your frontend URLs)
+  origin: ['https://layered-dining.onrender.com', 'http://localhost:3000'],
   credentials: true,
 }));
 
