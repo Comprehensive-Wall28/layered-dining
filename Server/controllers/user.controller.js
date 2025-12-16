@@ -3,11 +3,11 @@ const userService = require("../services/user.service");
 
 const userController = {
 
-    deleteAccount: async (req, res) => {
+    deleteAccount: async (req, res) => { //can manager also do it?
         try {
             const { id } = req.params;
 
-            if(!id){
+            if (!id) {
                 const error = new Error('No ID provided')
                 error.code = 400;
                 throw error;
@@ -15,7 +15,7 @@ const userController = {
 
             await userService.deleteAccount(id);
 
-             res.status(200).json({
+            res.status(200).json({
                 status: 'success',
                 message: 'User account deleted successfully'
             });
@@ -29,9 +29,9 @@ const userController = {
         }
     },
 
-    getCurrentUser: async (req, res) => {
+    getCurrentUser: async (req, res) => { //can manager also do it?
         try {
-            const {id} = req.user;
+            const { id } = req.user;
             //call service
             const user = await userService.getCurrentUser(id);
 
@@ -46,7 +46,7 @@ const userController = {
                     status: 'error',
                     message: error.message
                 });
-            } else if(error.code == 400) { //ID not provided
+            } else if (error.code == 400) { //ID not provided
                 res.status(400).json({
                     status: 'error',
                     message: error.message
@@ -60,10 +60,27 @@ const userController = {
         }
     },
 
-    updateUserProfile: async (req, res) => {
+    getCartId: async (req, res) => {
         try {
-            const {id} = req.user;
-            const {name, email, password} = req.body;
+            const { id } = req.user;
+            const cartId = await userService.getCartId(id);
+
+            res.status(200).json({
+                status: 'success',
+                cartId
+            });
+        } catch (error) {
+            res.status(error.code || 500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    updateUserProfile: async (req, res) => { //can manager also do it?
+        try {
+            const { id } = req.user;
+            const { name, email, password } = req.body;
 
             //call service
             const user = await userService.updateUserProfile(id, name, email, password);
@@ -74,7 +91,7 @@ const userController = {
             });
 
         } catch (error) {
-            if(error.code == 404){ //user not found
+            if (error.code == 404) { //user not found
                 res.status(404).json({
                     status: 'error',
                     message: error.message
@@ -85,12 +102,12 @@ const userController = {
                     message: error.message
                 });
             }
-        }   
+        }
     },
 
-    getLogs: async (req, res) => {
+    getLogs: async (req, res) => { //what does this do?
         try {
-            const {id} = req.params;
+            const { id } = req.params;
             //call service
             const logs = await userService.getLogs(id);
 
@@ -104,6 +121,112 @@ const userController = {
                 status: 'error',
                 message: error.message
             })
+        }
+    },
+
+    createFeedback: async (req, res) => {
+        try {
+            const { feedback, rating } = req.body;
+            const { id } = req.user;
+
+            const result = await userService.createFeedback(id, feedback, rating);
+
+            res.status(201).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            if (error.code == 400) { //feedback not provided
+                res.status(400).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        }
+    },
+
+    getFeedback: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            const result = await userService.getFeedback(id);
+
+            res.status(200).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            if (error.code == 404) {
+                res.status(404).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else if (error.code == 400) {
+                res.status(400).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
+        }
+    },
+
+    getAllFeedback: async (req, res) => {
+        try {
+            const result = await userService.getAllFeedback();
+
+            res.status(200).json({
+                status: 'success',
+                result
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    deleteFeedback: async (req, res) => {
+        try {
+            const { id } = req.params;
+
+            await userService.deleteFeedback(id);
+
+            res.status(200).json({
+                status: 'success',
+                message: 'Feedback deleted successfully'
+            });
+
+        } catch (error) {
+            if (error.code == 404) {
+                res.status(404).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else if (error.code == 400) {
+                res.status(400).json({
+                    status: 'error',
+                    message: error.message
+                });
+            } else {
+                res.status(500).json({
+                    status: 'error',
+                    message: error.message
+                });
+            }
         }
     }
 }

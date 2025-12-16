@@ -63,6 +63,29 @@ const tableController = {
     },
 
     /**
+     * Get tables created by the authenticated user
+     */
+    getMyTables: async (req, res) => {
+        try {
+            const userId = req.user.id;
+            const tables = await tableService.getTablesByCreator(userId);
+
+            res.status(200).json({
+                status: 'success',
+                count: tables.length,
+                tables
+            });
+
+        } catch (error) {
+            const statusCode = error.code || 500;
+            res.status(statusCode).json({
+                status: 'error',
+                message: error.message
+            });
+        }
+    },
+
+    /**
      * Get table by ID
      */
     getTableById: async (req, res) => {

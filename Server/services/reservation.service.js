@@ -1,6 +1,8 @@
 const ReservationModel = require('../models/reservation');
 const TableModel = require('../models/table');
 const LogModel = require('../models/log');
+const User = require('../models/user');
+const nodemailer = require('nodemailer');
 const mongoose = require('mongoose');
 
 const reservationService = {
@@ -18,7 +20,7 @@ const reservationService = {
             // Find all tables that can accommodate the party size
             const suitableTables = await TableModel.find({
                 capacity: { $gte: partySize },
-                status: { $in: ['Available', 'Reserved'] } // Not in maintenance or permanently occupied
+                status: { $in: ['Available'] } // Only available tables, not in maintenance or currently occupied
             });
 
             if (suitableTables.length === 0) {
@@ -92,12 +94,209 @@ const reservationService = {
     },
 
     /**
+     * Send reservation confirmation email and notify managers
+     * @param {Object} reservation - The reservation object
+     */
+    async sendReservationEmail(reservation) {
+        try {
+            const transporter = nodemailer.createTransport({
+                service: "Gmail",
+                auth: {
+                    user: process.env.EMAIL_USER,
+                    pass: process.env.EMAIL_PASS,
+                },
+            });
+
+            const recipientEmail = reservation.customerEmail;
+
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: recipientEmail,
+                subject: "✓ Reservation Confirmation - LayeredDining",
+                html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    <title>Reservation Confirmation</title>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            .force-light { color-scheme: light !important; }
+        }
+    </style>
+</head>
+<body class="force-light" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f0f4f8; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f0f4f8; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px; background-color: #ffffff; margin: 0 auto; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); overflow: hidden;">
+                    
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%); background-color: #2563eb; padding: 40px 20px; text-align: center;">
+                            <div style="background-color: rgba(255,255,255,0.2); width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 50%; line-height: 80px; text-align: center;">
+                                <span style="font-size: 40px;">🍽️</span>
+                            </div>
+                            <h1 style="margin: 0; color: #ffffff !important; font-size: 28px; font-weight: bold; -webkit-text-fill-color: #ffffff;">Reservation Confirmed!</h1>
+                            <p style="margin: 10px 0 0 0; color: #ffffff !important; font-size: 16px; opacity: 0.95; -webkit-text-fill-color: #ffffff;">Your table is ready and waiting</p>
+                        </td>
+                    </tr>
+
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 30px 20px; background-color: #ffffff;">
+                            <p style="margin: 0 0 20px 0; color: #1f2937 !important; font-size: 16px; line-height: 1.5; -webkit-text-fill-color: #1f2937;">
+                                Hello <strong style="color: #2563eb !important; -webkit-text-fill-color: #2563eb;">${reservation.customerName}</strong>,
+                            </p>
+                            <p style="margin: 0 0 25px 0; color: #374151 !important; font-size: 15px; line-height: 1.6; -webkit-text-fill-color: #374151;">
+                                Thank you for choosing LayeredDining! We're excited to welcome you. Here are your reservation details:
+                            </p>
+
+                            <!-- Reservation Details Box -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f8fafc; border: 2px solid #e5e7eb; border-radius: 12px; margin-bottom: 25px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 20px;">
+                                        
+                                        <!-- Date -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                                            <tr>
+                                                <td style="padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="color: #6b7280 !important; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; -webkit-text-fill-color: #6b7280;">📅 DATE</div>
+                                                    <div style="color: #111827 !important; font-size: 18px; font-weight: bold; -webkit-text-fill-color: #111827;">${new Date(reservation.reservationDate).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Time -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                                            <tr>
+                                                <td style="padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="color: #6b7280 !important; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; -webkit-text-fill-color: #6b7280;">⏰ TIME</div>
+                                                    <div style="color: #111827 !important; font-size: 18px; font-weight: bold; -webkit-text-fill-color: #111827;">${reservation.startTime} - ${reservation.endTime}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Party Size -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                                            <tr>
+                                                <td style="padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="color: #6b7280 !important; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; -webkit-text-fill-color: #6b7280;">👥 PARTY SIZE</div>
+                                                    <div style="color: #111827 !important; font-size: 18px; font-weight: bold; -webkit-text-fill-color: #111827;">${reservation.partySize} ${reservation.partySize > 1 ? 'Guests' : 'Guest'}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Table -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 15px;">
+                                            <tr>
+                                                <td style="padding-bottom: 8px; border-bottom: 1px solid #e5e7eb;">
+                                                    <div style="color: #6b7280 !important; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; -webkit-text-fill-color: #6b7280;">🪑 TABLE NUMBER</div>
+                                                    <div style="color: #111827 !important; font-size: 18px; font-weight: bold; -webkit-text-fill-color: #111827;">${reservation.tableId.tableNumber}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <!-- Contact -->
+                                        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="padding-bottom: 8px;">
+                                                    <div style="color: #6b7280 !important; font-size: 12px; text-transform: uppercase; font-weight: 600; margin-bottom: 5px; -webkit-text-fill-color: #6b7280;">✉️ CONTACT</div>
+                                                    <div style="color: #111827 !important; font-size: 15px; font-weight: 600; -webkit-text-fill-color: #111827;">${reservation.customerEmail}</div>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Important Notice -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; margin-bottom: 25px; overflow: hidden;">
+                                <tr>
+                                    <td style="padding: 15px 15px;">
+                                        <p style="margin: 0; color: #78350f !important; font-size: 14px; line-height: 1.6; -webkit-text-fill-color: #78350f;">
+                                            <strong style="color: #78350f !important; -webkit-text-fill-color: #78350f;">💡 Please Note:</strong> If you need to modify or cancel your reservation, please reply to this email or contact us at least 24 hours in advance.
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 0 0 15px 0; color: #374151 !important; font-size: 15px; line-height: 1.6; -webkit-text-fill-color: #374151;">
+                                We look forward to providing you with an exceptional dining experience!
+                            </p>
+                            <p style="margin: 0; color: #1f2937 !important; font-size: 15px; font-weight: 600; -webkit-text-fill-color: #1f2937;">
+                                Warm regards,<br>
+                                <span style="color: #2563eb !important; font-size: 16px; font-weight: bold; -webkit-text-fill-color: #2563eb;">The LayeredDining Team</span>
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #1f2937; padding: 25px 20px; text-align: center;">
+                            <p style="margin: 0 0 10px 0; color: #d1d5db !important; font-size: 13px; line-height: 1.6; -webkit-text-fill-color: #d1d5db;">
+                                📍 123 Restaurant Street, City, State 12345<br>
+                                📞 (555) 123-4567 | 🌐 www.layereddining.com
+                            </p>
+                            <p style="margin: 10px 0 0 0; color: #9ca3af !important; font-size: 12px; -webkit-text-fill-color: #9ca3af;">
+                                © ${new Date().getFullYear()} LayeredDining. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+            `
+            };
+
+            await transporter.sendMail(mailOptions);
+
+            // Notify managers
+            const managers = await User.find({ role: 'Manager' });
+
+            for (let manager of managers) {
+                const alreadyNotified = manager.notifications.some(
+                    n => n.title === `New Reservation: ${reservation._id}` && !n.read
+                );
+
+                if (!alreadyNotified) {
+                    manager.notifications.push({
+                        title: `New Reservation: ${reservation._id}`,
+                        message: `
+Reservation Details:
+- Customer: ${reservation.customerName}
+- Email: ${reservation.customerEmail}
+- Table: ${reservation.tableId.tableNumber}
+- Party Size: ${reservation.partySize}
+- Date: ${reservation.reservationDate.toDateString()}
+- Time: ${reservation.startTime} - ${reservation.endTime}
+            `
+                    });
+                    await manager.save();
+                }
+            }
+        } catch (error) {
+            console.error('Error sending reservation email/notifications:', error);
+            // Don't throw error - email failure shouldn't fail the reservation
+        }
+    },
+
+    /**
      * Create a new reservation
      * @param {Object} reservationData - Reservation details
-     * @param {Object} user - User creating the reservation
+     * @param {Object} user - User creating the reservation (authenticated user)
+     * @param {String} targetCustomerId - The customer ID for whom the reservation is being made
      * @returns {Object} Created reservation
      */
-    async createReservation(reservationData, user) {
+    async createReservation(reservationData, user, targetCustomerId) {
         try {
             const { 
                 tableId, 
@@ -131,7 +330,35 @@ const reservationService = {
             const isTableAvailable = availableTables.some(t => t._id.toString() === tableId);
 
             if (!isTableAvailable) {
-                const error = new Error('Table is not available at the requested time');
+                // Find the conflicting reservation(s) for this table
+                const searchDate = new Date(reservationDate);
+                searchDate.setHours(0, 0, 0, 0);
+                const nextDay = new Date(searchDate);
+                nextDay.setDate(nextDay.getDate() + 1);
+
+                const conflictingReservations = await ReservationModel.find({
+                    tableId: tableId,
+                    reservationDate: {
+                        $gte: searchDate,
+                        $lt: nextDay
+                    },
+                    status: { $in: ['Pending', 'Confirmed'] }
+                });
+
+                // Find reservations that overlap with the requested time
+                const overlappingReservations = conflictingReservations.filter(reservation => 
+                    this.timeOverlap(startTime, endTime, reservation.startTime, reservation.endTime)
+                );
+
+                let errorMessage = 'Table is not available at the requested time.';
+                if (overlappingReservations.length > 0) {
+                    const conflicts = overlappingReservations.map(r => 
+                        `${r.startTime} to ${r.endTime}`
+                    ).join(', ');
+                    errorMessage = `This table is already occupied during the following time slot(s): ${conflicts}. Please choose a different time or table.`;
+                }
+
+                const error = new Error(errorMessage);
                 error.code = 409;
                 throw error;
             }
@@ -143,7 +370,7 @@ const reservationService = {
 
             // Create the reservation
             const newReservation = new ReservationModel({
-                userId: user.id,
+                userId: targetCustomerId, // The customer for whom the reservation is made
                 tableId,
                 partySize,
                 reservationDate: new Date(reservationDate),
@@ -156,7 +383,7 @@ const reservationService = {
                 customerPhone,
                 specialRequests: specialRequests || '',
                 occasion: occasion || 'None',
-                createdBy: user.id
+                createdBy: user.id // The authenticated user who created it
             });
 
             await newReservation.save();
@@ -164,7 +391,7 @@ const reservationService = {
             // Create log entry
             const log = new LogModel({
                 action: 'CREATE',
-                description: `Reservation created for table ${table.tableNumber} on ${reservationDate}`,
+                description: `Reservation created for table ${table.tableNumber} on ${reservationDate} from ${startTime} to ${endTime}.`,
                 affectedDocument: newReservation._id,
                 affectedModel: 'Reservation',
                 severity: 'NOTICE',
@@ -176,6 +403,11 @@ const reservationService = {
             // Populate table and user details
             await newReservation.populate('tableId');
             await newReservation.populate('userId', 'name email');
+
+            // Send confirmation email in background (non-blocking)
+            this.sendReservationEmail(newReservation).catch(err => 
+                console.error('Background email error:', err)
+            );
 
             return newReservation;
 
@@ -255,7 +487,7 @@ const reservationService = {
      */
     async updateReservationStatus(reservationId, status, user) {
         try {
-            const reservation = await ReservationModel.findById(reservationId);
+            const reservation = await ReservationModel.findById(reservationId).populate('tableId');
 
             if (!reservation) {
                 const error = new Error('Reservation not found');
@@ -263,13 +495,18 @@ const reservationService = {
                 throw error;
             }
 
+            const oldStatus = reservation.status;
             reservation.status = status;
             await reservation.save();
+
+            // Note: Table status is NOT automatically changed based on reservations
+            // Table status only reflects physical state (Available/Occupied/Maintenance)
+            // Staff should manually set to 'Occupied' when guests are seated
 
             // Create log entry
             const log = new LogModel({
                 action: 'UPDATE',
-                description: `Reservation status updated to ${status}`,
+                description: `Reservation status updated from ${oldStatus} to ${status} for table ${reservation.tableId.tableNumber || reservation.tableId}.`,
                 affectedDocument: reservation._id,
                 affectedModel: 'Reservation',
                 severity: 'NOTICE',
@@ -299,7 +536,7 @@ const reservationService = {
      */
     async cancelReservation(reservationId, user) {
         try {
-            const reservation = await ReservationModel.findById(reservationId);
+            const reservation = await ReservationModel.findById(reservationId).populate('tableId');
 
             if (!reservation) {
                 const error = new Error('Reservation not found');
@@ -323,10 +560,13 @@ const reservationService = {
             reservation.status = 'Cancelled';
             await reservation.save();
 
+            // Note: Table status is NOT automatically changed
+            // Availability is determined by checking reservation time slots
+
             // Create log entry
             const log = new LogModel({
                 action: 'UPDATE',
-                description: `Reservation cancelled`,
+                description: `Reservation cancelled for table ${reservation.tableId.tableNumber || reservation.tableId}.`,
                 affectedDocument: reservation._id,
                 affectedModel: 'Reservation',
                 severity: 'IMPORTANT',

@@ -1,7 +1,4 @@
-/**
- * Centralized role definitions for the application
- * This ensures consistency across all routes and prevents typos
- */
+
 
 const ROLES = {
     ADMIN: 'Admin',

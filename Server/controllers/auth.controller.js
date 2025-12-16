@@ -1,6 +1,6 @@
 require("dotenv").config();
 const authService = require("../services/auth.service");
-
+const cartService = require("../services/cart.service");
 const authController = {
 
     login: async (req, res) => {
@@ -34,13 +34,20 @@ const authController = {
         // 1. Extract from the request
         const { email, password, name, role } = req.body;
 
+
         try {
-            // 2. Call the core service function
+            // 2. Create user first, then create a cart and attach it to avoid orphan carts
             const newUser = await authService.registerUser(email, password, name, role);
-            
+            // create a cart associated with this user
+            const userCart = await cartService.createCart(newUser.id);
+            // attach cart to user
+            const userService = require('../services/user.service');
+            await userService.setCartId(newUser.id, userCart._id);
+            const cartId = await userService.getCartId(newUser.id);
+
             res.status(201).json({ 
                 message: 'User registered successfully',
-                user: newUser
+                user: { ...newUser, cart: cartId }
             });
 
         } catch (error) {

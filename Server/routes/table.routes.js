@@ -12,6 +12,12 @@ router.get("/",
     tableController.getAllTables
 );
 
+// Get tables created by the authenticated user
+router.get("/my-tables", 
+    authenticationMiddleware, 
+    tableController.getMyTables
+);
+
 router.get("/:id", 
     authenticationMiddleware, 
     tableController.getTableById

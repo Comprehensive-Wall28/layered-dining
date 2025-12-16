@@ -26,7 +26,8 @@ const tableService = {
                 capacity,
                 location: location || 'Indoor',
                 status: 'Available',
-                features: features || []
+                features: features || [],
+                createdBy: user.id
             });
 
             await newTable.save();
@@ -64,6 +65,25 @@ const tableService = {
 
         } catch (error) {
             const err = new Error('Error fetching tables: ' + error.message);
+            err.code = 500;
+            throw err;
+        }
+    },
+
+    /**
+     * Get tables created by a specific user
+     * @param {String} userId - User ID
+     * @returns {Array} Tables created by the user
+     */
+    async getTablesByCreator(userId) {
+        try {
+            const tables = await TableModel.find({ createdBy: userId })
+                .populate('createdBy', 'name email role')
+                .sort({ tableNumber: 1 });
+            return tables;
+
+        } catch (error) {
+            const err = new Error('Error fetching user tables: ' + error.message);
             err.code = 500;
             throw err;
         }

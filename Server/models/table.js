@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const tableSchema = new mongoose.Schema({
     tableNumber: {
-        type: String,
+        type: Number,
         required: true,
         unique: true,
     },
@@ -18,13 +18,18 @@ const tableSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Available', 'Occupied', 'Reserved', 'Maintenance'],
+        enum: ['Available', 'Occupied', 'Maintenance'],
         default: 'Available',
     },
     features: [{
         type: String,
         enum: ['Window View', 'Wheelchair Accessible', 'Quiet Area', 'Near Kitchen', 'Near Entrance'],
     }],
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true,
+    },
     createdAt: {
         type: Date,
         default: Date.now,
