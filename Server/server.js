@@ -40,7 +40,7 @@ app.use(cookieParser())
 app.set('trust proxy', 1); // Trust first proxy for secure cookies on Render/Vercel
 
 app.use(cors({
-  origin: ['https://layered-dining.onrender.com', 'http://localhost:3000', 'https://layered-dining-frontend-q8lz8fxwf.vercel.app'],
+  origin: ['https://layered-dining.onrender.com', 'http://localhost:3000', 'https://layered-dining-frontend-rnxb8mabl.vercel.app'],
   credentials: true,
 }));
 
