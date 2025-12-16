@@ -189,7 +189,7 @@ const customerService = {
      * @throws {Error} If parameters are missing
      */
     async createFeedback(userId, feedback, rating) {
-        if (!userId || !feedback || !rating) {
+        if (!feedback || !rating) {
             const error = new Error('Missing required fields');
             error.code = 400;
             throw error;
